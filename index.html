@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
-<title>IWO 評価システム v3.0</title>
+<title>IWO リワード v3.9</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--navy:#1B2A4A;--navy2:#243561;--red:#C0392B;--red2:#E74C3C;--gold:#D4A017;--bg:#F4F6FB;--white:#fff;--border:#E2E6EF;--text:#1B2A4A;--sub:#6B7A99;--light:#A0AABF;--ok:#1D9E75;--ok-bg:#EAF7F2;--warn:#E67E22;--warn-bg:#FEF3E7;--danger:#C0392B;--danger-bg:#FDECEA;--info:#2980B9;--info-bg:#EBF5FB;--purple:#7F77DD;--purple-bg:#EEEDFE;--r:10px;--rs:6px;--sh:0 2px 12px rgba(27,42,74,.08);--sh2:0 8px 32px rgba(27,42,74,.14);}
+:root{--navy:#3D8BD4;--navy2:#5AA0DE;--red:#E8734A;--red2:#F08A63;--gold:#F2B705;--bg:#F7FAFD;--white:#fff;--border:#DCE8F4;--text:#1F4E79;--sub:#5A7A99;--light:#9FBBD6;--ok:#1D9E75;--ok-bg:#EAF7F2;--warn:#E67E22;--warn-bg:#FEF3E7;--danger:#C0392B;--danger-bg:#FDECEA;--info:#2980B9;--info-bg:#EBF5FB;--purple:#7F77DD;--purple-bg:#EEEDFE;--r:10px;--rs:6px;--sh:0 2px 12px rgba(31,78,121,.08);--sh2:0 8px 32px rgba(31,78,121,.14);}
 *{box-sizing:border-box;margin:0;padding:0;}
 body{font-family:'Hiragino Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;}
 #app{display:flex;min-height:100vh;}
 #sidebar{width:230px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
 #main{margin-left:230px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
-#topbar{height:56px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(27,42,74,.06);}
+#topbar{height:56px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(31,78,121,.06);}
 #content{flex:1;padding:26px 26px 40px;}
 .sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1);}
 .sb-logo-mark{display:flex;align-items:center;gap:9px;}
@@ -21,7 +21,7 @@ body{font-family:'Hiragino Sans','Noto Sans JP',sans-serif;background:var(--bg);
 .sb-user{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;}
 .sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
 .sb-uname{font-size:12px;color:rgba(255,255,255,.9);font-weight:500;}.sb-urole{font-size:10px;color:rgba(255,255,255,.45);}
-.sb-sec{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;padding:16px 16px 5px;}
+.sb-sec{font-size:11px;font-weight:700;color:rgba(255,255,255,.85);letter-spacing:.08em;text-transform:uppercase;padding:16px 16px 5px;}
 .sb-nav{padding:0 9px 6px;}
 .nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);color:rgba(255,255,255,.6);font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;transition:all .12s;}
 .nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}.nav-item.active{background:var(--red);color:#fff;}
@@ -74,7 +74,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
 .fl{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;}
 .fl .req{color:var(--danger);margin-left:2px;}
 .fi,.fsel,.fta{padding:8px 11px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .12s;}
-.fi:focus,.fsel:focus,.fta:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,42,74,.07);}
+.fi:focus,.fsel:focus,.fta:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(31,78,121,.07);}
 .fta{min-height:68px;resize:vertical;font-family:inherit;}
 .fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
 .fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
@@ -83,7 +83,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
 .steps{display:flex;align-items:center;overflow-x:auto;padding:4px 0 8px;}
 .step{display:flex;flex-direction:column;align-items:center;min-width:76px;}
 .step-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
-.sd-done{background:var(--ok);color:#fff;}.sd-active{background:var(--navy);color:#fff;box-shadow:0 0 0 4px rgba(27,42,74,.12);}.sd-pending{background:var(--border);color:var(--sub);}
+.sd-done{background:var(--ok);color:#fff;}.sd-active{background:var(--navy);color:#fff;box-shadow:0 0 0 4px rgba(31,78,121,.12);}.sd-pending{background:var(--border);color:var(--sub);}
 .step-lbl{font-size:10px;color:var(--sub);margin-top:4px;text-align:center;line-height:1.3;}
 .step-conn{flex:1;height:2px;background:var(--border);min-width:16px;}.sc-done{background:var(--ok);}
 .inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
@@ -113,8 +113,8 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
   <div class="login-box">
     <div class="login-logo">
       <div class="login-icon">IWO</div>
-      <h1 style="font-size:20px;font-weight:700;color:var(--navy)">評価システム</h1>
-      <p style="font-size:12px;color:var(--sub);margin-top:3px">株式会社アイダブルオー v3.6（本番接続版）</p>
+      <h1 style="font-size:20px;font-weight:700;color:var(--navy)">IWO リワード</h1>
+      <p style="font-size:12px;color:var(--sub);margin-top:3px">株式会社アイダブルオー v3.9</p>
     </div>
     <div class="fg"><label class="fl">メールアドレス</label><input class="fi" id="login-email" type="email" placeholder="taro@iwo.co.jp" autocomplete="username" onkeydown="if(event.key==='Enter')login()"></div>
     <div class="fg" style="margin-bottom:8px"><label class="fl">パスワード</label><input class="fi" id="login-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"></div>
@@ -125,7 +125,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
 </div>
 <div id="app" style="display:none">
   <div id="sidebar">
-    <div class="sb-logo"><div class="sb-logo-mark"><div class="sb-icon">IWO</div><div><div class="sb-title">評価システム</div><div class="sb-ver">v3.6（本番接続版）</div></div></div></div>
+    <div class="sb-logo"><div class="sb-logo-mark"><div class="sb-icon">IWO</div><div><div class="sb-title">IWO リワード</div><div class="sb-ver">v3.9</div></div></div></div>
     <div class="sb-user"><div class="sb-avatar" id="sb-avatar">和</div><div><div class="sb-uname" id="sb-name">和氣 佑輔</div><div class="sb-urole" id="sb-role">管理者</div></div></div>
     <div id="sb-content"></div>
   </div>
@@ -182,7 +182,7 @@ function calcSheetTotal(sheet){
   return{comp,kpi,total:trunc2(comp+kpi)};
 }
 function calcScore(sheet){
-  if(!sheet||['goal_setting','goal_wait','goal_locked'].includes(sheet.status))return null;
+  if(!sheet||['goal_setting','goal_wait','goal_wait_final','goal_locked'].includes(sheet.status))return null;
   if(sheet.status!=='confirmed')return null;
   return calcSheetTotal(sheet).total;
 }
@@ -239,7 +239,7 @@ function payStatusBadge(s){
   return m[s]||'<span class="badge b-gray">—</span>';
 }
 function statusBadge(s){
-  const m={confirmed:'<span class="badge b-ok">確定済</span>',self_eval:'<span class="badge b-info">自己評価中</span>',ev1_wait:'<span class="badge b-warn">1次評価待ち</span>',ev1:'<span class="badge b-warn">1次評価中</span>',final_wait:'<span class="badge b-purple">最終評価待ち</span>',final:'<span class="badge b-purple">最終評価中</span>',admin_wait:'<span class="badge b-navy">管理者確定待ち</span>',goal_setting:'<span class="badge b-gray">目標設定中</span>',goal_wait:'<span class="badge b-warn">目標承認待ち</span>',goal_locked:'<span class="badge b-navy">目標ロック済</span>'};
+  const m={confirmed:'<span class="badge b-ok">確定済</span>',self_eval:'<span class="badge b-info">自己評価中</span>',ev1_wait:'<span class="badge b-warn">1次評価待ち</span>',ev1:'<span class="badge b-warn">1次評価中</span>',final_wait:'<span class="badge b-purple">最終評価待ち</span>',final:'<span class="badge b-purple">最終評価中</span>',admin_wait:'<span class="badge b-navy">管理者確定待ち</span>',goal_setting:'<span class="badge b-gray">目標設定中</span>',goal_wait:'<span class="badge b-warn">目標承認待ち（1次）</span>',goal_wait_final:'<span class="badge b-purple">目標承認待ち（最終）</span>',goal_locked:'<span class="badge b-navy">目標ロック済</span>'};
   return m[s]||'<span class="badge b-gray">未設定</span>';
 }
 let CU=null,CP='dashboard',selPid='P12',selQ='Q3',selHalf='H1',evalMember=null,evalQ='Q3',evalPid='P12';
@@ -560,14 +560,14 @@ function scoreChip(s,max){if(s==null)return'<span style="color:var(--light)">—
 // 給与改定用：期のプルダウンのみ（年1回改訂のためQタブなし）
 function periodOnlySelector(cb){
   return`<div class="inline" style="margin-bottom:14px;gap:8px">
-    <select class="fsel" style="width:200px" onchange="selPid=this.value;${cb}">
+    <select class="fsel" style="width:auto;min-width:240px;max-width:100%" onchange="selPid=this.value;${cb}">
       ${DB.periods.map(p=>`<option value="${p.id}" ${p.id===selPid?'selected':''}>${p.label}${p.year?`（${p.year}）`:''}</option>`).join('')}
     </select>
   </div>`;
 }
 function periodSelector(cb){
   return`<div class="inline" style="margin-bottom:14px;gap:8px">
-    <select class="fsel" style="width:200px" onchange="selPid=this.value;selQ='Q1';${cb}">
+    <select class="fsel" style="width:auto;min-width:240px;max-width:100%" onchange="selPid=this.value;selQ='Q1';${cb}">
       ${DB.periods.map(p=>`<option value="${p.id}" ${p.id===selPid?'selected':''}>${p.label}（${p.year}）</option>`).join('')}
     </select>
     <div class="inline gap-4">${['Q1','Q2','Q3','Q4'].map(q=>{const qd=DB.periods.find(x=>x.id===selPid)?.qs[q];return`<button class="btn btn-sm ${q===selQ?'btn-navy':'btn-out'}" onclick="selQ='${q}';${cb}">${q}<div style="font-size:9px;font-weight:400">${qd?.label?.replace(/Q\d（/,'').replace('）','')||''}</div></button>`;}).join('')}</div>
@@ -575,7 +575,7 @@ function periodSelector(cb){
 }
 function halfSelector(cb){
   return`<div class="inline" style="margin-bottom:14px;gap:8px">
-    <select class="fsel" style="width:200px" onchange="selPid=this.value;selHalf='H1';${cb}">
+    <select class="fsel" style="width:auto;min-width:240px;max-width:100%" onchange="selPid=this.value;selHalf='H1';${cb}">
       ${DB.periods.map(p=>`<option value="${p.id}" ${p.id===selPid?'selected':''}>${p.label}（${p.year}）</option>`).join('')}
     </select>
     <button class="btn btn-sm ${selHalf==='H1'?'btn-navy':'btn-out'}" onclick="selHalf='H1';${cb}">上期（Q1+Q2）</button>
@@ -627,7 +627,8 @@ function renderAdminDashboard(){
 }
 function renderMyDashboard(){
   const code=CU.code;const scores=getScores(DB.currentPeriod)[code]||{};const bright=getBrightRanks(DB.currentPeriod,DB.currentQ);
-  const b=bright[code];const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+  const blDone=(DB.brightLineData?.[DB.currentPeriod]?.[DB.currentQ]?.adminConfirmed||false)&&(DB.incentiveAdminConfirmed?.[DB.currentPeriod]?.[DB.currentQ]||false);
+  const b=blDone?bright[code]:null;const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
   const pool=calcPool(DB.currentPeriod,DB.currentQ);const kgiD=DB.kgiData[DB.currentPeriod]?.[DB.currentQ]||{kgi:0,gross:0};
   const myAvg=[scores.Q1,scores.Q2,scores.Q3,scores.Q4].filter(v=>v!=null);
   const avgV=myAvg.length?(myAvg.reduce((a,v)=>a+v,0)/myAvg.length).toFixed(1):'—';
@@ -648,7 +649,7 @@ function renderMyDashboard(){
   <div class="grid2">
     <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">📊 自分のスコア履歴</span></div>
     <div class="tbl-wrap"><table><thead><tr><th>期間</th><th style="text-align:right">スコア</th><th style="text-align:center">ランク</th><th style="text-align:center">ブライトline</th><th>ステータス</th></tr></thead><tbody>${histRows}</tbody></table></div></div>
-    <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">💰 Q3 インセンティブ試算</span></div><div class="card-body"><div style="text-align:center;padding:6px 0 14px"><div class="stat-val">${pool.toFixed(2)}<span class="stat-unit">万円</span></div></div>${distRows}<div style="font-size:11px;color:var(--light);margin-top:8px">※個人名は非公開</div></div></div>
+    <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">💰 ${DB.currentQ} インセンティブ試算</span></div><div class="card-body"><div style="text-align:center;padding:6px 0 14px"><div class="stat-val">${pool.toFixed(2)}<span class="stat-unit">万円</span></div></div>${distRows}<div style="font-size:11px;color:var(--light);margin-top:8px">※個人名は非公開</div></div></div>
   </div>`;
 }
 
@@ -720,7 +721,7 @@ function renderBright(){
         <td style="font-size:14px;font-weight:700;color:var(--light)">${i+1}</td>
         <td>${memberCell(m.code)}</td>
         <td>${m.score!=null?`<div class="inline gap-4">${rankChip(m.score)}<span style="font-weight:700">${m.score}</span></div>`:'<span style="color:var(--warn);font-size:11px">評価確定待ち</span>'}</td>
-        <td style="text-align:center">${isMine&&!adminConfirmed?blRankInput(curRank,`setBLRank('${selPid}','${selQ}','${CU.code}','${m.code}',this.value)`):blRankInput(curRank,'',true)}</td>
+        <td style="text-align:center">${isMine&&!adminConfirmed&&m.score!=null?blRankInput(curRank,`setBLRank('${selPid}','${selQ}','${CU.code}','${m.code}',this.value)`):blRankInput(curRank,'',true)}</td>
         <td class="num">${distRate}%</td>
         <td class="num num-pos">${amt}万円</td>
       </tr>`;
@@ -728,7 +729,7 @@ function renderBright(){
     const myApproved=blData._ev1Approved?.[CU.code]||false;
     return`<div class="pg-hd"><div class="pg-title">ブライトline</div><div class="pg-sub">担当メンバーのランクを入力してください</div></div>
     ${periodSelector('renderPage(CP)')}
-    <div class="notice n-info"><span>ℹ️</span><span>担当メンバー（${myMs.map(m=>m.name).join('・')||'なし'}）のランクを入力後、「承認」ボタンを押してください。</span></div>
+    <div class="notice n-info"><span>ℹ️</span><span>担当メンバー（${myMs.map(m=>m.name).join('・')||'なし'}）のランクを入力後、「承認」ボタンを押してください。※ランクは、対象メンバーの評価シートが確定した後に入力できます。</span></div>
     <div class="card"><div class="card-hd">
       <span class="card-title">🏆 ブライトline入力（${selPid} ${selQ}）</span>
       <span class="badge b-navy">原資 ${pool.toFixed(2)}万円</span>
@@ -740,7 +741,7 @@ function renderBright(){
     </tr></thead><tbody>${rows}</tbody></table></div>
     ${!adminConfirmed?`<div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
       ${myApproved?'<span class="badge b-ok">✅ 承認済 — 管理者の確定待ち</span>':
-      `<button class="btn btn-ok btn-sm" onclick="approveBL('${selPid}','${selQ}','${CU.code}')">✅ 承認して管理者へ送付</button>`}
+      (myMs.length&&myMs.every(x=>scores[x.code]?.[selQ]!=null&&myBL[x.code])?`<button class="btn btn-ok btn-sm" onclick="approveBL('${selPid}','${selQ}','${CU.code}')">✅ 承認して管理者へ送付</button>`:'<span class="badge b-gray">⏳ 担当メンバー全員の評価シート確定＋ランク入力後に、承認できます</span>')}
       <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="if(confirm('入力内容をリセットしますか？')){resetBL('${selPid}','${selQ}','${CU.code}')}">↩ リセット</button>
     </div>`:'<div style="padding:10px 18px"><span class="badge b-ok">✅ 管理者が確定済み</span></div>'}
     </div>`;
@@ -762,7 +763,7 @@ function renderBright(){
       <td>${memberCell(m.code)}</td>
       <td>${m.score!=null?`<div class="inline gap-4">${rankChip(m.score)}<span style="font-weight:700">${m.score}</span></div>`:'<span style="color:var(--warn);font-size:11px">確定待ち</span>'}</td>
       ${finalMembers.map(f=>`<td style="text-align:center">${blRankInput(blByFinal[f.code],'',true)}</td>`).join('')}
-      <td style="text-align:center">${adminConfirmed?blRankInput(confirmedRank,'',true):blRankInput(confirmedRank,`setConfirmedBL('${selPid}','${selQ}','${m.code}',this.value)`)}</td>
+      <td style="text-align:center">${adminConfirmed||m.score==null?blRankInput(confirmedRank,'',true):blRankInput(confirmedRank,`setConfirmedBL('${selPid}','${selQ}','${m.code}',this.value)`)}</td>
       <td class="num">${distRate}%</td>
       <td class="num num-pos">${amt}万円</td>
     </tr>`;
@@ -770,6 +771,7 @@ function renderBright(){
   const allApproved=finalMembers.length>0&&finalMembers.every(f=>ev1Approved[f.code]);
   return`<div class="pg-hd"><div class="pg-title">ブライトline</div><div class="pg-sub">相対評価・確定ブライトline入力（管理者）</div></div>
   ${periodSelector('renderPage(CP)')}
+  ${sorted.some(m=>m.score==null)?`<div class="notice n-info"><span>ℹ️</span><span>ブライトlineは、評価シートが確定したメンバーから入力できます（スコア欄が「確定待ち」のメンバーは入力不可）。</span></div>`:''}
   ${!allApproved?`<div class="notice n-warn"><span>⚠️</span><span>最終評価者からの承認待ちです（${finalMembers.filter(f=>!ev1Approved[f.code]).map(f=>f.name).join('・')}）</span></div>`:''}
   <div class="card"><div class="card-hd">
     <span class="card-title">🏆 ブライトline（${selPid} ${selQ}）</span>
@@ -782,7 +784,7 @@ function renderBright(){
     <th style="text-align:right">配分率</th><th style="text-align:right">個人支給額</th>
   </tr></thead><tbody>${rows}</tbody></table></div>
   <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-    ${!adminConfirmed?`<button class="btn btn-navy btn-sm" onclick="adminConfirmBL('${selPid}','${selQ}')">🔒 確定ブライトlineを確定</button>`:'<span class="badge b-ok">✅ 確定済 — メンバーへ反映済み</span>'}
+    ${!adminConfirmed?(sorted.every(m=>m.score!=null)?`<button class="btn btn-navy btn-sm" onclick="adminConfirmBL('${selPid}','${selQ}')">🔒 確定ブライトlineを確定</button>`:'<span class="badge b-gray">⏳ 全員の評価シート確定後に、確定できます</span>'):'<span class="badge b-ok">✅ 確定済 — メンバーへ反映済み</span>'}
     ${adminConfirmed?'':'<button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="adminReturnBL()">↩ 最終評価者へ差し戻し</button>'}
   </div></div>`;
 }
@@ -801,6 +803,12 @@ function setConfirmedBL(pid,q,memberCode,val){
   renderPage('bright');
 }
 function approveBL(pid,q,evCode){
+  const scoresChk=getScores(pid);
+  const myMsChk=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外'&&m.evFinal===evCode);
+  const myBLChk=DB.brightLineData[pid]?.[q]?.ev1?.[evCode]||{};
+  if(!myMsChk.length||!myMsChk.every(m=>scoresChk[m.code]?.[q]!=null&&myBLChk[m.code])){
+    alert('担当メンバー全員の評価シートが確定し、全員分のランクを入力してから承認してください。');return;
+  }
   if(!DB.brightLineData[pid]?.[q])return;
   if(!DB.brightLineData[pid][q]._ev1Approved)DB.brightLineData[pid][q]._ev1Approved={};
   DB.brightLineData[pid][q]._ev1Approved[evCode]=true;
@@ -1237,14 +1245,16 @@ function renderEvalDetail(code,q){
   const m=DB.members.find(x=>x.code===code);if(!m)return'<div class="notice n-warn">メンバーが見つかりません</div>';
   const sheet=DB.sheets[code]?.[evalPid]?.[q];
   if(!sheet)return`<div class="card"><div class="card-body" style="color:var(--sub)">このQのシートはまだ作成されていません。</div></div>`;
+  if(sheet.status==='goal_wait'&&!m.ev1)sheet.status='goal_wait_final';
   const confirmed=sheet.status==='confirmed';const locked=sheet.locked&&CU.role!=='admin';
-  const canWeight=CU.role==='admin'||CU.role==='final';
+  const canWeight=((CU.role==='admin'||CU.role==='final')&&!(sheet.status==='confirmed'))||(CU.code===code&&sheet.status==='goal_setting');
   const isSelf=CU.code===code;const isAdmin=CU.role==='admin';
   const qStat=DB.periods.find(x=>x.id===evalPid)?.qs?.[q]?.status;
-  const isGoalApprover=(CU.role==='ev1'&&m.ev1===CU.code)||(CU.role==='final'&&m.evFinal===CU.code&&!m.ev1);
-  const canSelfInput=(isSelf&&sheet.status==='self_eval'&&(qStat==='active'||qStat==='confirmed'))||(isAdmin&&!confirmed);
-  const canEv1Input=(CU.role==='ev1'&&m.ev1===CU.code&&sheet.status==='ev1_wait')||(isAdmin&&!confirmed);
-  const canFinalInput=(CU.role==='final'&&m.evFinal===CU.code&&sheet.status==='final_wait')||(isAdmin&&!confirmed);
+  const canGoalEv1=CU.role==='ev1'&&m.ev1===CU.code&&sheet.status==='goal_wait';
+  const canGoalFinal=CU.role==='final'&&m.evFinal===CU.code&&sheet.status==='goal_wait_final';
+  const canSelfInput=isSelf&&sheet.status==='self_eval'&&(qStat==='active'||qStat==='confirmed');
+  const canEv1Input=CU.role==='ev1'&&m.ev1===CU.code&&sheet.status==='ev1_wait';
+  const canFinalInput=CU.role==='final'&&m.evFinal===CU.code&&sheet.status==='final_wait';
   const ev1Name=m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:'なし';
   const finalName=m.evFinal?DB.members.find(x=>x.code===m.evFinal)?.name:'—';
   const {comp,kpi,total}=calcSheetTotal(sheet);
@@ -1253,7 +1263,7 @@ function renderEvalDetail(code,q){
   const rank=confirmed&&total>0?getRank(total):null;
   const pastQs=['Q1','Q2','Q3','Q4'].filter(pq=>pq!==q&&DB.sheets[code]?.[evalPid]?.[pq]?.status==='confirmed');
   const stepDots=[
-    {l:'目標設定\n完了',done:['goal_locked','self_eval','ev1_wait','ev1','final_wait','final','admin_wait','confirmed'].includes(sheet.status),active:['goal_setting','goal_wait'].includes(sheet.status)},
+    {l:'目標設定\n完了',done:['goal_locked','self_eval','ev1_wait','ev1','final_wait','final','admin_wait','confirmed'].includes(sheet.status),active:['goal_setting','goal_wait','goal_wait_final'].includes(sheet.status)},
     {l:'自己評価\n完了',done:['ev1_wait','ev1','final_wait','final','admin_wait','confirmed'].includes(sheet.status),active:sheet.status==='self_eval'},
     ...(m.ev1?[{l:'1次評価\n完了',done:['final_wait','final','admin_wait','confirmed'].includes(sheet.status),active:['ev1','ev1_wait'].includes(sheet.status)}]:[]),
     ...(m.evFinal?[{l:'最終評価\n完了',done:['admin_wait','confirmed'].includes(sheet.status),active:['final','final_wait'].includes(sheet.status)}]:[]),
@@ -1261,21 +1271,23 @@ function renderEvalDetail(code,q){
   ];
   const steps=stepDots.map((st,i)=>`${i>0?`<div class="step-conn ${st.done?'sc-done':''}"></div>`:''}
     <div class="step"><div class="step-dot ${st.done?'sd-done':st.active?'sd-active':'sd-pending'}">${st.done?'✓':i+1}</div><div class="step-lbl" style="white-space:pre-line">${st.l}</div></div>`).join('');
-  const canEditGoals=(isAdmin&&!confirmed)||(isSelf&&sheet.status==='goal_setting')||(isGoalApprover&&sheet.status==='goal_wait');
+  const canEditGoals=(isSelf&&sheet.status==='goal_setting')||canGoalEv1||canGoalFinal;
   const canEdit=canEditGoals;
   // v3.6: 削除権限 — 管理者は最終確定前まで常に可 / 本人は目標設定中（ロック前）のみ可
   const canDelete=(isAdmin&&!confirmed)||(isSelf&&sheet.status==='goal_setting');
   const compRows=sheet.compItems.map((item,i)=>{
-    const itemLocked=item.locked&&!isAdmin;const itemGoalOnly=false;
-    return`<tr class="${itemLocked?'locked-row':''}">
+    const itemLocked=item.locked&&!isAdmin;const itemGoalOnly=false;const rowMuted=itemLocked&&['goal_setting','goal_wait','goal_wait_final','goal_locked'].includes(sheet.status);
+    return`<tr class="${rowMuted?'locked-row':''}">
       <td>
         <div style="font-size:11px;font-weight:600;color:var(--info)">${item.id}</div>
         <div style="font-size:13px;font-weight:500">${item.name}</div>
-        <div style="font-size:11px;color:var(--light);margin-top:2px">${item.desc}</div>
+        <div style="font-size:12px;color:var(--text);margin-top:2px">${item.desc}</div>
         <div style="margin-top:6px;padding:6px 8px;background:var(--bg);border-radius:4px;border-left:3px solid var(--info)">
           <div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">目標</div>
           ${isSelf&&sheet.status==='goal_setting'&&!itemLocked?`<input class="fi" style="font-size:12px;padding:4px 8px" value="${item.goal}" placeholder="目標を入力してください" onchange="setItemGoal('comp','${code}','${q}',${i},this.value)">`:`<div style="font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-word">${item.goal||'—'}</div>`}
         </div>
+        ${canSelfInput?`<div style="margin-top:6px;padding:6px 8px;background:#FFFDF2;border-radius:4px;border-left:3px solid var(--gold)"><div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">本人コメント</div><textarea class="fta" style="font-size:12px;padding:4px 8px;min-height:44px;width:100%" placeholder="取り組み内容・成果・所感などを入力" onchange="setItemComment('comp','${code}','${q}',${i},this.value)">${item.selfComment||''}</textarea></div>`
+        :item.selfComment?`<div style="margin-top:6px;padding:6px 8px;background:#FFFDF2;border-radius:4px;border-left:3px solid var(--gold)"><div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">本人コメント</div><div style="font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-word">${item.selfComment}</div></div>`:''}
       </td>
       <td class="num">${item.weight}%</td>
       <td style="text-align:center">${canSelfInput&&!itemGoalOnly?scoreSelect(item.selfScore,4,`setItemScore('comp','${code}','${q}',${i},'selfScore',this.value)`):scoreChip(item.selfScore,4)}</td>
@@ -1283,21 +1295,23 @@ function renderEvalDetail(code,q){
       <td style="text-align:center">${canFinalInput?scoreSelect(item.finalScore,4,`setItemScore('comp','${code}','${q}',${i},'finalScore',this.value)`):scoreChip(item.finalScore,4)}</td>
       <td class="num">${(((item.finalScore??item.ev1Score??0)*(item.weight||0)/compWsum)*(sheet.compWeight/4)).toFixed(2)}</td>
       <td>
-        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('comp','${code}','${q}',${i})">修正</button>${canDelete?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeCompItem('${code}','${q}',${i})">✕ 削除</button>`:''}`:
+        ${itemLocked?`<span class="lock-badge">🔒 目標ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('comp','${code}','${q}',${i})">修正</button>${canDelete?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeCompItem('${code}','${q}',${i})">✕ 削除</button>`:''}`:
         !confirmed&&isSelf&&sheet.status==='goal_setting'?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeCompItem('${code}','${q}',${i})">✕ 削除</button>`:''}
         ${isAdmin&&itemLocked?`<button class="btn btn-warn btn-sm" onclick="unlockItem('comp','${code}','${q}',${i})">🔓解除</button>`:''}
       </td>
     </tr>`;
   }).join('');
   const kpiRows=sheet.kpiItems.map((item,i)=>{
-    const itemLocked=item.locked&&!isAdmin;
-    return`<tr class="${itemLocked?'locked-row':''}">
+    const itemLocked=item.locked&&!isAdmin;const rowMuted=itemLocked&&['goal_setting','goal_wait','goal_wait_final','goal_locked'].includes(sheet.status);
+    return`<tr class="${rowMuted?'locked-row':''}">
       <td>
         <div style="font-size:13px;font-weight:500">${item.name}</div>
         <div style="margin-top:6px;padding:6px 8px;background:var(--bg);border-radius:4px;border-left:3px solid var(--warn)">
           <div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">目標</div>
           ${isSelf&&sheet.status==='goal_setting'&&!itemLocked?`<input class="fi" style="font-size:12px;padding:4px 8px" value="${item.goal}" placeholder="目標を入力してください" onchange="setItemGoal('kpi','${code}','${q}',${i},this.value)">`:`<div style="font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-word">${item.goal||'—'}</div>`}
         </div>
+        ${canSelfInput?`<div style="margin-top:6px;padding:6px 8px;background:#FFFDF2;border-radius:4px;border-left:3px solid var(--gold)"><div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">本人コメント</div><textarea class="fta" style="font-size:12px;padding:4px 8px;min-height:44px;width:100%" placeholder="取り組み内容・成果・所感などを入力" onchange="setItemComment('kpi','${code}','${q}',${i},this.value)">${item.selfComment||''}</textarea></div>`
+        :item.selfComment?`<div style="margin-top:6px;padding:6px 8px;background:#FFFDF2;border-radius:4px;border-left:3px solid var(--gold)"><div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">本人コメント</div><div style="font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-word">${item.selfComment}</div></div>`:''}
       </td>
       <td class="num">${item.weight}%</td>
       <td style="text-align:center">${canSelfInput?scoreSelect(item.selfRate,6,`setItemScore('kpi','${code}','${q}',${i},'selfRate',this.value)`):(item.selfRate!=null?scoreChip(item.selfRate,6):'<span style="color:var(--light)">—</span>')}</td>
@@ -1305,7 +1319,7 @@ function renderEvalDetail(code,q){
       <td style="text-align:center">${canFinalInput?scoreSelect(item.finalScore,6,`setItemScore('kpi','${code}','${q}',${i},'finalScore',this.value)`):scoreChip(item.finalScore,6)}</td>
       <td class="num">${(((item.finalScore??item.ev1Score??0)*(item.weight||0)/kpiWsum)*(sheet.kpiWeight/6)).toFixed(2)}</td>
       <td>
-        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('kpi','${code}','${q}',${i})">修正</button>${canDelete?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKpiItem('${code}','${q}',${i})">✕ 削除</button>`:''}`
+        ${itemLocked?`<span class="lock-badge">🔒 目標ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('kpi','${code}','${q}',${i})">修正</button>${canDelete?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKpiItem('${code}','${q}',${i})">✕ 削除</button>`:''}`
         :!confirmed&&isSelf&&sheet.status==='goal_setting'?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKpiItem('${code}','${q}',${i})">✕ 削除</button>`:''}
         ${isAdmin&&itemLocked?`<button class="btn btn-warn btn-sm" onclick="unlockItem('kpi','${code}','${q}',${i})">🔓解除</button>`:''}
       </td>
@@ -1313,7 +1327,7 @@ function renderEvalDetail(code,q){
   }).join('');
   const canGoalSubmit=isSelf&&sheet.status==='goal_setting'&&!locked;
   const canSelfSubmit=isSelf&&sheet.status==='self_eval'&&(qStat==='active'||qStat==='confirmed');
-  const canGoalApprove=(isGoalApprover||isAdmin)&&sheet.status==='goal_wait';
+
   const anyItemLocked=sheet.compItems.some(x=>x.locked)||sheet.kpiItems.some(x=>x.locked);
   return`<div class="card"><div class="card-hd">
     <span class="card-title">👤 ${m.name}（${m.pos}） ${q}</span>
@@ -1327,23 +1341,23 @@ function renderEvalDetail(code,q){
   <div class="card-body" style="padding-bottom:10px"><div class="steps">${steps}</div></div>
   <div style="padding:0 18px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
     ${/* ① メンバー：目標の承認依頼 */ canGoalSubmit?`<button class="btn btn-navy btn-sm" onclick="submitGoal('${code}','${q}')">📤 目標を保存・承認依頼</button>`:''}
-    ${/* ② 上長：目標の承認（WT調整・修正後にロック） */ canGoalApprove?`
-      <button class="btn btn-ok btn-sm" onclick="lockGoals('${code}','${q}')">✅ 目標設定完了（目標をロック）</button>
+    ${/* ②a 1次評価者：目標の修正・承認 */ canGoalEv1?`
+      <button class="btn btn-ok btn-sm" onclick="approveGoalEv1('${code}','${q}')">✅ 目標を承認・最終評価者へ</button>
       <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="returnGoal('${code}','${q}')">↩ メンバーへ差し戻し</button>`:''}
+    ${/* ②b 最終評価者：目標の修正・確定ロック */ canGoalFinal?`
+      <button class="btn btn-ok btn-sm" onclick="lockGoals('${code}','${q}')">🔒 目標確定ロック</button>
+      <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="returnGoalToEv1('${code}','${q}')">↩ ${m.ev1?'1次評価者へ差し戻し':'メンバーへ差し戻し'}</button>`:''}
     ${/* 目標ロック済・評価開始待ち */ sheet.status==='goal_locked'?`<span class="badge b-navy">🔒 目標ロック済 — 管理者の評価開始待ち</span>`:''}
     ${/* ③ メンバー：自己評価の承認依頼 */ canSelfSubmit?`<button class="btn btn-navy btn-sm" onclick="submitSelfEval('${code}','${q}')">📤 自己評価を保存・承認依頼</button>`:''}
     ${/* 評価開始前 */ isSelf&&sheet.status==='self_eval'&&!(qStat==='active'||qStat==='confirmed')?`<span class="badge b-gray">⏳ 管理者の評価開始待ち — 開始後に自己評価を入力できます</span>`:''}
     ${/* ④ 1次評価者 */ CU.role==='ev1'&&m.ev1===CU.code&&sheet.status==='ev1_wait'?`
       <button class="btn btn-ok btn-sm" onclick="submitEv1('${code}','${q}')">✅ 1次評価を確定・最終評価者へ承認依頼</button>
       <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="returnToSelf('${code}','${q}')">↩ メンバーへ差し戻し</button>`:''}
-    ${/* ⑤ 最終評価者 */ CU.role==='final'&&m.evFinal===CU.code&&sheet.status==='final_wait'?`
-      <button class="btn btn-purple btn-sm" onclick="submitFinal('${code}','${q}')">✅ 最終評価を確定・管理者へ</button>
+    ${/* ⑤ 最終評価者：評点の確定・ロック */ CU.role==='final'&&m.evFinal===CU.code&&sheet.status==='final_wait'?`
+      <button class="btn btn-purple btn-sm" onclick="submitFinal('${code}','${q}')">🔒 評価シートを確定・ロック</button>
       <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="returnToEv1('${code}','${q}')">↩ ${m.ev1?'1次評価者へ差し戻し':'メンバーへ差し戻し'}</button>`:''}
-    ${/* ⑥ 管理者最終確定 — 最終評価者の確定後にのみ表示 */ CU.role==='admin'&&sheet.status==='admin_wait'?`
-      <button class="btn btn-navy btn-sm" onclick="adminFinalConfirm('${code}','${q}')">🔒 最終確定</button>
-      <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="adminReturnToFinal('${code}','${q}')">↩ 最終評価者へ差し戻し</button>`:''}
-    ${/* 管理者：目標ロック解除 */ isAdmin&&!confirmed&&(sheet.status==='goal_locked'||anyItemLocked)?`<button class="btn btn-warn btn-sm" onclick="adminUnlockGoals('${code}','${q}')">🔓 目標ロック解除（管理者のみ）</button>`:''}
-    ${CU.role==='admin'&&sheet.status==='confirmed'?`<span class="badge b-ok">✅ 確定済 — 確定後の修正・削除はできません</span>`:''}
+    ${/* 管理者：目標ロック解除（最終評価者へ差し戻し） */ isAdmin&&!confirmed&&['goal_locked','self_eval'].includes(sheet.status)?`<button class="btn btn-warn btn-sm" onclick="adminUnlockGoals('${code}','${q}')">🔓 目標ロック解除（最終評価者へ差し戻し）</button>`:''}
+    ${/* 管理者：確定済シートのロック解除 */ isAdmin&&sheet.status==='confirmed'?`<span class="badge b-ok">✅ 確定済</span><button class="btn btn-warn btn-sm" onclick="adminReturnToFinal('${code}','${q}')">🔓 ロック解除（最終評価者へ差し戻し）</button>`:''}
   </div></div>
 
   <div style="display:flex;border-bottom:1px solid var(--border);background:#fff;border-radius:var(--r) var(--r) 0 0;overflow:hidden;border:1px solid var(--border);border-bottom:none">
@@ -1353,7 +1367,7 @@ function renderEvalDetail(code,q){
   <div id="ec" data-tabpnl="eval" class="tab-pnl on" style="padding:0">
     <div class="card" style="border-radius:0;border-top:none;margin-bottom:0">
       <div class="card-hd"><span class="card-title">📋 コンピテンシー（行動目標）</span>
-        <div class="inline gap-4"><span class="badge b-info">評価ウェイト ${sheet.compWeight}%</span>${canWeight?'<button class="btn btn-out btn-sm">ウェイト変更</button>':''}</div>
+        <div class="inline gap-4"><span class="badge b-info">評価ウェイト ${sheet.compWeight}%</span>${canWeight?`<button class="btn btn-out btn-sm" onclick="openWeightModal('${code}','${q}')">ウェイト変更</button>`:''}</div>
       </div>
       <div class="tbl-wrap"><table><thead><tr><th>項目・着眼点・目標</th><th style="text-align:right">WT%</th><th style="text-align:center">自己(1〜4)</th><th style="text-align:center">1次(1〜4)</th><th style="text-align:center">最終(1〜4)</th><th style="text-align:right">獲得点</th><th></th></tr></thead>
       <tbody>${compRows||'<tr><td colspan="7" style="color:var(--light);text-align:center;padding:20px">項目未設定</td></tr>'}</tbody>
@@ -1372,7 +1386,8 @@ function renderEvalDetail(code,q){
       <div class="stat at-red" style="margin:0"><div class="stat-lbl">成果スコア（${sheet.kpiWeight}点満点）</div><div class="stat-val" style="font-size:20px">${kpi.toFixed(2)}<span class="stat-unit">点</span></div></div>
       <div class="stat" style="margin:0;border-top:3px solid ${rank?.color||'var(--border)'}"><div class="stat-lbl">最終評点（100点満点）</div><div class="stat-val" style="font-size:22px;color:${rank?.color||'var(--navy)'}">${total.toFixed(2)}</div></div>
       <div class="stat" style="margin:0;border-top:3px solid ${rank?.color||'var(--border)'};text-align:center"><div class="stat-lbl">ランク</div>
-        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px"><span style="font-size:26px;font-weight:800;color:${rank?.color||'var(--sub)'}">${rank?.rank||'—'}</span>${rank?`<div><div style="font-size:11px;color:var(--sub)">ピッチ変動</div><div style="font-size:13px;font-weight:700;color:${rank.p>=0?'var(--ok)':'var(--danger)'}">${rank.p>=0?'+':''}${rank.p}P</div></div>`:''}</div>
+        <div style="display:flex;align-items:center;justify-content:center;margin-top:4px"><span style="font-size:26px;font-weight:800;color:${rank?.color||'var(--sub)'}">${rank?.rank||'—'}</span></div>
+        <div style="font-size:10px;color:var(--light);margin-top:4px">※ピッチは4Q平均ランクで給与改定時に反映</div>
       </div></div></div></div>`:''}
   </div>
   ${pastQs.map(pq=>{const ps=DB.sheets[code]?.[evalPid]?.[pq];const pscore=calcScore(ps);const pr=pscore?getRank(pscore):null;return`<div id="ep-${pq}" data-tabpnl="eval" class="tab-pnl" style="padding:0"><div style="padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:0 0 var(--r) var(--r)"><div class="inline gap-4" style="margin-bottom:8px"><span class="badge b-gray">${pq}</span><span class="badge b-ok">確定済 🔒</span>${pscore?`<span style="font-size:14px;font-weight:700;color:${pr?.color}">${pscore}点 / ${pr?.rank}</span>`:''}</div><div style="font-size:12px;color:var(--sub)">コンピテンシー：${ps?.compItems?.map(x=>`${x.name}（最終:${x.finalScore??'—'}）`).join('、')||'—'}</div><div style="font-size:12px;color:var(--sub);margin-top:3px">KPI：${ps?.kpiItems?.map(x=>`${x.name}（最終:${x.finalScore??'—'}）`).join('、')||'—'}</div></div></div>`;}).join('')}
@@ -1432,6 +1447,29 @@ function removeKpiItem(code,q,i){
   const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
 }
 function unlockItem(type,code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;if(sheet.status==='confirmed'){alert('最終確定済みの評価は修正できません。');return;}if(type==='comp')sheet.compItems[i].locked=false;else sheet.kpiItems[i].locked=false;const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
+function openWeightModal(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  if(sheet.status==='confirmed'){alert('最終確定済みのシートはウェイト変更できません。');return;}
+  const old=document.getElementById('weight-modal');if(old)old.remove();
+  const div=document.createElement('div');div.id='weight-modal';
+  div.innerHTML=`<div style="position:fixed;inset:0;background:rgba(31,78,121,.45);z-index:300;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)document.getElementById('weight-modal').remove()">
+    <div class="card" style="width:380px;margin:0"><div class="card-hd"><span class="card-title">⚖️ 評価ウェイト変更</span><button class="btn btn-ghost btn-sm" onclick="document.getElementById('weight-modal').remove()">✕</button></div><div class="card-body">
+      <div class="fg"><div class="fl">コンピテンシー：評価ウェイト（％）</div><input class="fi" id="wm-comp" type="number" min="0" max="100" value="${sheet.compWeight}" oninput="document.getElementById('wm-kpi').value=Math.max(0,Math.min(100,100-(parseInt(this.value)||0)))"></div>
+      <div class="fg" style="margin-top:10px"><div class="fl">KPI：評価ウェイト（％）※自動計算</div><input class="fi" id="wm-kpi" type="number" value="${sheet.kpiWeight}" readonly style="background:var(--bg)"></div>
+      <div style="font-size:11px;color:var(--sub);margin-top:8px">※計算式：コンピテンシー評価ウェイト＋KPI評価ウェイト＝100％</div>
+      <div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-navy btn-sm" onclick="saveWeight('${code}','${q}')">保存</button><button class="btn btn-out btn-sm" onclick="document.getElementById('weight-modal').remove()">キャンセル</button></div>
+    </div></div></div>`;
+  document.body.appendChild(div);
+}
+function saveWeight(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const c=parseInt(document.getElementById('wm-comp').value);
+  if(isNaN(c)||c<0||c>100){alert('0〜100の数値を入力してください。');return;}
+  sheet.compWeight=c;sheet.kpiWeight=100-c;
+  document.getElementById('weight-modal').remove();
+  syncSheet(code,q);
+  const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);else renderPage('eval-sheet');
+}
 function unlockSheet(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
   if(sheet.status==='confirmed'){alert('最終確定済みの評価は、いかなる場合でもロック解除・修正・削除はできません。');return;}
@@ -1463,12 +1501,13 @@ function confirmAddKpi(code,q){
 function renderTeamEval(){
   const myTeam=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外'&&(m.ev1===CU.code||m.evFinal===CU.code));
   if(!myTeam.length)return`<div class="pg-hd"><div class="pg-title">担当メンバー評価シート</div></div><div class="card"><div class="card-body" style="color:var(--sub)">担当メンバーはいません。</div></div>`;
-  const rows=myTeam.map(m=>{const sheet=DB.sheets[m.code]?.[DB.currentPeriod]?.[DB.currentQ];const s=getScores(DB.currentPeriod)[m.code]?.[DB.currentQ];const canInput=(CU.role==='ev1'&&m.ev1===CU.code&&['goal_wait','ev1_wait'].includes(sheet?.status))||(CU.role==='final'&&m.evFinal===CU.code&&['goal_wait','final_wait'].includes(sheet?.status))||CU.role==='admin';
+  const rows=myTeam.map(m=>{const sheet=DB.sheets[m.code]?.[DB.currentPeriod]?.[DB.currentQ];if(sheet&&sheet.status==='goal_wait'&&!m.ev1)sheet.status='goal_wait_final';const s=getScores(DB.currentPeriod)[m.code]?.[DB.currentQ];const canInput=(CU.role==='ev1'&&m.ev1===CU.code&&['goal_wait','ev1_wait'].includes(sheet?.status))||(CU.role==='final'&&m.evFinal===CU.code&&['goal_wait_final','final_wait'].includes(sheet?.status));
     return`<tr><td>${memberCell(m.code)}</td><td style="font-size:12px;color:var(--sub)">${m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:'なし'}</td><td style="font-size:12px;color:var(--sub)">${m.evFinal?DB.members.find(x=>x.code===m.evFinal)?.name:'—'}</td><td>${statusBadge(sheet?.status||'goal_setting')}</td><td class="num">${s??'<span style="color:var(--warn)">評価中</span>'}</td>
-    <td>${canInput?`<button class="btn btn-navy btn-sm" onclick="evalMember='${m.code}';evalPid='${DB.currentPeriod}';evalQ='${DB.currentQ}';goto('eval-sheet')">評点入力</button>`:`<button class="btn btn-out btn-sm" onclick="evalMember='${m.code}';evalPid='${DB.currentPeriod}';evalQ='${DB.currentQ}';goto('eval-sheet')">閲覧</button>`}</td></tr>`;
+    <td>${canInput?`<button class="btn btn-navy btn-sm" onclick="evalMember='${m.code}';evalPid='${DB.currentPeriod}';evalQ='${DB.currentQ}';goto('eval-sheet')">${['goal_wait','goal_wait_final'].includes(sheet?.status)?'目標確認':'評点入力'}</button>`:`<button class="btn btn-out btn-sm" onclick="evalMember='${m.code}';evalPid='${DB.currentPeriod}';evalQ='${DB.currentQ}';goto('eval-sheet')">閲覧</button>`}</td></tr>`;
   }).join('');
-  return`<div class="pg-hd"><div class="pg-title">担当メンバー評価シート</div><div class="pg-sub">Q3（11〜1月）</div></div>
-  <div class="card"><div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th>1次評価者</th><th>最終評価者</th><th>ステータス</th><th style="text-align:right">Q3スコア</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  const teQLabel=DB.periods.find(p=>p.id===DB.currentPeriod)?.qs?.[DB.currentQ]?.label||DB.currentQ;
+  return`<div class="pg-hd"><div class="pg-title">担当メンバー評価シート</div><div class="pg-sub">${teQLabel}</div></div>
+  <div class="card"><div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th>1次評価者</th><th>最終評価者</th><th>ステータス</th><th style="text-align:right">${DB.currentQ}スコア</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
 }
 
 // ===== MEMBERS =====
@@ -1701,7 +1740,7 @@ function startEval(pid,q){
   p.qs[q].status='active';
   DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').forEach(m=>{
     const sh=DB.sheets[m.code]?.[pid]?.[q];
-    if(sh&&['goal_setting','goal_wait','goal_locked'].includes(sh.status))sh.status='self_eval';
+    if(sh&&['goal_setting','goal_wait','goal_wait_final','goal_locked'].includes(sh.status))sh.status='self_eval';
   });
   alert(`${q} の評価を開始しました。`);
   renderPage('params');
@@ -1942,6 +1981,11 @@ function setItemScore(type,code,q,i,field,val){
   item[field]=val===''?null:parseInt(val);
   const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
 }
+function setItemComment(type,code,q,i,val){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
+  item.selfComment=val;
+}
 function setItemGoal(type,code,q,i,val){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
   const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
@@ -1950,7 +1994,7 @@ function setItemGoal(type,code,q,i,val){
 function submitGoal(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
   const m=DB.members.find(x=>x.code===code);
-  sheet.status='goal_wait';
+  sheet.status=m.ev1?'goal_wait':'goal_wait_final';
   const approver=m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:DB.members.find(x=>x.code===m.evFinal)?.name;
   alert(`目標を保存し、上長（${approver||'上長'}）へ承認依頼しました。`);
   renderPage('eval-sheet');
@@ -1961,23 +2005,39 @@ function returnGoal(code,q){
   alert('メンバーへ差し戻しました。');
   renderPage('eval-sheet');
 }
+function approveGoalEv1(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.status='goal_wait_final';
+  const m=DB.members.find(x=>x.code===code);
+  alert(`目標を承認し、最終評価者（${DB.members.find(x=>x.code===m.evFinal)?.name||'最終評価者'}）へ送付しました。`);
+  renderPage('eval-sheet');
+}
+function returnGoalToEv1(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const m=DB.members.find(x=>x.code===code);
+  sheet.status=m.ev1?'goal_wait':'goal_setting';
+  alert(m.ev1?'1次評価者へ差し戻しました。':'メンバーへ差し戻しました。');
+  renderPage('eval-sheet');
+}
 function lockGoals(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
   sheet.compItems.forEach(x=>x.locked=true);sheet.kpiItems.forEach(x=>x.locked=true);
   const qStat=DB.periods.find(x=>x.id===evalPid)?.qs?.[q]?.status;
   sheet.status=(qStat==='active')?'self_eval':'goal_locked';
-  alert('目標設定を完了し、目標をロックしました。'+(qStat==='active'?'自己評価の入力が可能です。':'管理者が「評価開始」すると自己評価の入力が可能になります。')+'\n※ロック後の解除・修正・再ロックは管理者のみ可能です。');
+  alert('目標を確定し、ロックしました。'+(qStat==='active'?'メンバーは自己評価の入力が可能です。':'管理者が「評価開始」すると自己評価の入力が可能になります。')+'\n※ロック解除が必要な場合は、管理者が最終評価者へ差し戻します。');
   renderPage('eval-sheet');
 }
 function adminUnlockGoals(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
-  if(!confirm('目標ロックを解除しますか？（管理者のみ）\n解除後は目標・WTを修正のうえ「目標設定完了（目標をロック）」で再ロックしてください。'))return;
+  if(!confirm('目標ロックを解除し、最終評価者へ差し戻しますか？（管理者のみ）\n最終評価者が修正のうえ、再度「目標確定ロック」を行います。'))return;
   sheet.compItems.forEach(x=>x.locked=false);sheet.kpiItems.forEach(x=>x.locked=false);
-  if(['goal_locked','self_eval'].includes(sheet.status))sheet.status='goal_wait';
+  if(['goal_locked','self_eval'].includes(sheet.status))sheet.status='goal_wait_final';
   renderPage('eval-sheet');
 }
 function submitSelfEval(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const allEmpty=sheet.compItems.every(x=>x.selfScore==null)&&sheet.kpiItems.every(x=>x.selfRate==null);
+  if(allEmpty){alert('自己評点が未入力です。各項目の「自己」欄を入力してから承認依頼してください。');return;}
   const m=DB.members.find(x=>x.code===code);
   sheet.status=m.ev1?'ev1_wait':'final_wait';
   alert('自己評価を提出しました。');
@@ -1997,8 +2057,9 @@ function returnToSelf(code,q){
 }
 function submitFinal(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
-  sheet.status='admin_wait';
-  alert('最終評価を確定しました。管理者へ送付されます。');
+  if(!confirm('評価シート（評点）を確定・ロックしますか？\n確定後の修正は、管理者によるロック解除（最終評価者へ差し戻し）が必要です。'))return;
+  sheet.status='confirmed';sheet.locked=true;
+  alert('評価シートを確定・ロックしました。ブライトlineの入力が可能になります。');
   renderPage('eval-sheet');
 }
 function returnToEv1(code,q){
@@ -2018,8 +2079,10 @@ function adminFinalConfirm(code,q){
 }
 function adminReturnToFinal(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
-  sheet.status='final_wait';
-  alert('最終評価者へ差し戻しました。');
+  if(DB.brightLineData?.[evalPid]?.[q]?.adminConfirmed){alert('このQのブライトlineは確定済みのため、ロック解除できません。');return;}
+  if(!confirm('評価シートのロックを解除し、最終評価者へ差し戻しますか？（管理者のみ）\n最終評価者が修正のうえ、再度「確定・ロック」を行います。'))return;
+  sheet.status='final_wait';sheet.locked=false;
+  alert('ロックを解除し、最終評価者へ差し戻しました。');
   renderPage('eval-sheet');
 }
 
@@ -2330,7 +2393,7 @@ function buildDBFromRows(T) {
     DB.sheets[sh.emp_code] = DB.sheets[sh.emp_code] || {};
     DB.sheets[sh.emp_code][sh.period_id] = DB.sheets[sh.emp_code][sh.period_id] || {};
     const o = {
-      status: sh.status, compWeight: sh.comp_weight, kpiWeight: sh.kpi_weight,
+      status: sh.status==='admin_wait'?'final_wait':sh.status, compWeight: sh.comp_weight, kpiWeight: sh.kpi_weight,
       locked: !!sh.locked, compItems: [], kpiItems: [], _sheetId: sh.id,
     };
     DB.sheets[sh.emp_code][sh.period_id][sh.q] = o;
@@ -2348,7 +2411,7 @@ function buildDBFromRows(T) {
     const sh = sheetById[it.sheet_id]; if (!sh) return;
     sh.kpiItems.push({
       name: it.name, goal: it.goal || '', weight: num(it.weight),
-      selfRate: it.self_rate, ev1Score: it.ev1_score, finalScore: it.final_score, locked: !!it.locked, _id: it.id,
+      selfRate: it.self_rate, ev1Score: it.ev1_score, finalScore: it.final_score, selfComment: it.self_comment || '', finalComment: it.final_comment || '', locked: !!it.locked, _id: it.id,
     });
   });
 
@@ -2533,7 +2596,7 @@ function openPassChange() {
   const div = document.createElement('div');
   div.id = 'pass-modal';
   div.innerHTML = `
-  <div style="position:fixed;inset:0;background:rgba(27,42,74,.45);z-index:300;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)document.getElementById('pass-modal').remove()">
+  <div style="position:fixed;inset:0;background:rgba(31,78,121,.45);z-index:300;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)document.getElementById('pass-modal').remove()">
     <div style="background:#fff;border-radius:14px;padding:26px 28px;width:340px;box-shadow:var(--sh2)">
       <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px">🔑 パスワード変更</div>
       <div class="fg"><label class="fl">新しいパスワード（8文字以上）</label><input class="fi" type="password" id="pw-new1" autocomplete="new-password"></div>
@@ -2675,19 +2738,20 @@ async function syncSheet(code, q) {
     const i2 = await sb.from('sheet_kpi_items').insert(sheet.kpiItems.map((it, i) => ({
       sheet_id: sid, sort_no: i, name: it.name || '', goal: it.goal || null, weight: it.weight || 0,
       self_rate: it.selfRate ?? null, ev1_score: it.ev1Score ?? null, final_score: it.finalScore ?? null, locked: !!it.locked,
+      self_comment: it.selfComment || '', final_comment: it.finalComment || '',
     })));
     if (i2.error) { sbFail('KPI明細', i2.error); return; }
   }
 }
 // 引数の1・2番目が (code, q) の関数
-['submitGoal', 'returnGoal', 'lockGoals', 'adminUnlockGoals', 'submitSelfEval', 'submitEv1',
+['submitGoal', 'returnGoal', 'approveGoalEv1', 'returnGoalToEv1', 'lockGoals', 'adminUnlockGoals', 'submitSelfEval', 'submitEv1',
  'returnToSelf', 'submitFinal', 'returnToEv1', 'adminFinalConfirm', 'adminReturnToFinal',
  'unlockSheet', 'confirmAddComp', 'confirmAddKpi', 'removeCompItem', 'removeKpiItem'].forEach(name => {
   const orig = window[name]; if (typeof orig !== 'function') return;
   window[name] = function (...a) { const r = orig.apply(this, a); syncSheet(a[0], a[1]); return r; };
 });
 // 引数が (type, code, q, ...) の関数
-['setItemScore', 'setItemGoal', 'saveItemEdit', 'unlockItem'].forEach(name => {
+['setItemScore', 'setItemGoal', 'setItemComment', 'saveItemEdit', 'unlockItem'].forEach(name => {
   const orig = window[name]; if (typeof orig !== 'function') return;
   window[name] = function (...a) { const r = orig.apply(this, a); syncSheet(a[1], a[2]); return r; };
 });
@@ -2961,7 +3025,7 @@ async function syncTerm(pid, term) {
     if (p && p.qs[q]?.status === 'active') {
       (async () => {
         await sbRun('評価開始', sb.from('period_terms').update({ status: 'active', eval_started: true }).eq('period_id', pid).eq('term', q));
-        await sbRun('評価開始', sb.from('evaluation_sheets').update({ status: 'self_eval' }).eq('period_id', pid).eq('q', q).in('status', ['goal_setting', 'goal_wait', 'goal_locked']));
+        await sbRun('評価開始', sb.from('evaluation_sheets').update({ status: 'self_eval' }).eq('period_id', pid).eq('q', q).in('status', ['goal_setting', 'goal_wait', 'goal_wait_final', 'goal_locked']));
       })();
     }
     return r;
