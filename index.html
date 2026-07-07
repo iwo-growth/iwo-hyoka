@@ -114,7 +114,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
     <div class="login-logo">
       <div class="login-icon">IWO</div>
       <h1 style="font-size:20px;font-weight:700;color:var(--navy)">評価システム</h1>
-      <p style="font-size:12px;color:var(--sub);margin-top:3px">株式会社アイダブルオー v3.4（本番接続版）</p>
+      <p style="font-size:12px;color:var(--sub);margin-top:3px">株式会社アイダブルオー v3.5（本番接続版）</p>
     </div>
     <div class="fg"><label class="fl">メールアドレス</label><input class="fi" id="login-email" type="email" placeholder="taro@iwo.co.jp" autocomplete="username" onkeydown="if(event.key==='Enter')login()"></div>
     <div class="fg" style="margin-bottom:8px"><label class="fl">パスワード</label><input class="fi" id="login-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"></div>
@@ -125,7 +125,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
 </div>
 <div id="app" style="display:none">
   <div id="sidebar">
-    <div class="sb-logo"><div class="sb-logo-mark"><div class="sb-icon">IWO</div><div><div class="sb-title">評価システム</div><div class="sb-ver">v3.4（本番接続版）</div></div></div></div>
+    <div class="sb-logo"><div class="sb-logo-mark"><div class="sb-icon">IWO</div><div><div class="sb-title">評価システム</div><div class="sb-ver">v3.5（本番接続版）</div></div></div></div>
     <div class="sb-user"><div class="sb-avatar" id="sb-avatar">和</div><div><div class="sb-uname" id="sb-name">和氣 佑輔</div><div class="sb-urole" id="sb-role">管理者</div></div></div>
     <div id="sb-content"></div>
   </div>
@@ -1716,12 +1716,12 @@ function renderParams(){
   </div>
   <div id="pt-master" data-tabpnl="params" class="tab-pnl" style="padding:16px 0">
     <div class="grid3">
-      ${[['所属部マスタ',DB.depts],['役職マスタ',DB.positions]].map(([title,items])=>`<div class="card" style="margin:0"><div class="card-hd"><span class="card-title">${title}</span></div><div class="card-body">
-        ${items.map(it=>`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:13px">${it}</span><button class="btn btn-out btn-sm">編集</button><button class="btn btn-ghost btn-sm" style="color:var(--danger)">削除</button></div>`).join('')}
-        <button class="btn btn-out btn-sm" style="margin-top:8px;width:100%">＋ 追加</button></div></div>`).join('')}
+      ${[['所属部マスタ',DB.depts,'dept'],['役職マスタ',DB.positions,'pos']].map(([title,items,kind])=>`<div class="card" style="margin:0"><div class="card-hd"><span class="card-title">${title}</span></div><div class="card-body">
+        ${items.map(it=>`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:13px">${it}</span><button class="btn btn-out btn-sm" onclick="masterEdit('${kind}','${it}')">編集</button><button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="masterDelete('${kind}','${it}')">削除</button></div>`).join('')}
+        <button class="btn btn-out btn-sm" style="margin-top:8px;width:100%" onclick="masterAdd('${kind}')">＋ 追加</button></div></div>`).join('')}
       <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">所属チームマスタ</span></div><div class="card-body">
-        ${Object.entries(DB.teams).flatMap(([dept,teams])=>teams.map(t=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:12px">${t}<div style="font-size:10px;color:var(--light)">${dept}</div></span><button class="btn btn-out btn-sm">編集</button></div>`)).join('')}
-        <button class="btn btn-out btn-sm" style="margin-top:8px;width:100%">＋ 追加</button></div></div>
+        ${Object.entries(DB.teams).flatMap(([dept,teams])=>teams.map(t=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:12px">${t}<div style="font-size:10px;color:var(--light)">${dept}</div></span><button class="btn btn-out btn-sm" onclick="masterEditTeam('${dept}','${t}')">編集</button><button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="masterDeleteTeam('${dept}','${t}')">削除</button></div>`)).join('')}
+        <button class="btn btn-out btn-sm" style="margin-top:8px;width:100%" onclick="masterAddTeam()">＋ 追加</button></div></div>
     </div>
   </div>
   <div style="margin-top:14px;padding:14px 18px;background:var(--white);border-radius:var(--r);border:1px solid var(--border)">
@@ -2111,6 +2111,83 @@ async function saveMemberEdit() {
   const md = document.getElementById('edit-member-modal'); if (md) md.innerHTML = '';
   renderPage('members');
   alert('保存しました。');
+}
+
+// ---------- マスタ管理（所属部・役職・チーム）の編集（v3.5で本実装） ----------
+async function _masterReload() {
+  await loadAllFromSupabase();
+  renderPage('params');
+  const btns = document.querySelectorAll('[data-tabg="params"]');
+  if (btns[2]) swTab('pt-master', btns[2], 'params');
+}
+async function _nextSortNo(table) {
+  const { data, error } = await sb.from(table).select('sort_no').order('sort_no', { ascending: false }).limit(1);
+  if (error || !data || !data.length) return 1;
+  return (Number(data[0].sort_no) || 0) + 1;
+}
+async function masterAdd(kind) {
+  const label = kind === 'dept' ? '所属部' : '役職';
+  const name = (prompt('追加する' + label + 'の名前を入力してください') || '').trim();
+  if (!name) return;
+  const list = kind === 'dept' ? DB.depts : DB.positions;
+  if (list.includes(name)) { alert('同じ名前が既に存在します。'); return; }
+  const table = kind === 'dept' ? 'departments' : 'positions';
+  const sort = await _nextSortNo(table);
+  const ok = await sbRun(label + 'の追加', sb.from(table).insert({ name, sort_no: sort }));
+  if (ok) await _masterReload();
+}
+async function masterEdit(kind, oldName) {
+  const label = kind === 'dept' ? '所属部' : '役職';
+  const name = (prompt('「' + oldName + '」の新しい名前を入力してください', oldName) || '').trim();
+  if (!name || name === oldName) return;
+  const list = kind === 'dept' ? DB.depts : DB.positions;
+  if (list.includes(name)) { alert('同じ名前が既に存在します。'); return; }
+  const table = kind === 'dept' ? 'departments' : 'positions';
+  const ok = await sbRun(label + 'の変更', sb.from(table).update({ name }).eq('name', oldName));
+  if (!ok) return;
+  // 使っている社員・チーム側の名称も自動で追随させる
+  if (kind === 'dept') {
+    await sbRun('社員の所属部更新', sb.from('employees').update({ dept: name }).eq('dept', oldName));
+    await sbRun('チームの所属部更新', sb.from('teams').update({ dept_name: name }).eq('dept_name', oldName));
+  } else {
+    await sbRun('社員の役職更新', sb.from('employees').update({ pos: name }).eq('pos', oldName));
+  }
+  await _masterReload();
+}
+async function masterDelete(kind, name) {
+  const label = kind === 'dept' ? '所属部' : '役職';
+  const usedBy = DB.members.filter(m => kind === 'dept' ? m.dept === name : m.pos === name);
+  if (usedBy.length) {
+    alert('「' + name + '」は ' + usedBy.map(m => m.name).join('、') + ' さんに設定されているため削除できません。\n先に社員マスタで変更してください。');
+    return;
+  }
+  if (kind === 'dept' && (DB.teams[name] || []).length) {
+    alert('「' + name + '」にはチーム（' + DB.teams[name].join('、') + '）が登録されているため削除できません。\n先にチームを削除してください。');
+    return;
+  }
+  if (!confirm('「' + name + '」を削除しますか？')) return;
+  const table = kind === 'dept' ? 'departments' : 'positions';
+  const ok = await sbRun(label + 'の削除', sb.from(table).delete().eq('name', name));
+  if (ok) await _masterReload();
+}
+async function masterEditTeam(dept, oldName) {
+  const name = (prompt('チーム「' + oldName + '」（' + dept + '）の新しい名前を入力してください', oldName) || '').trim();
+  if (!name || name === oldName) return;
+  if ((DB.teams[dept] || []).includes(name)) { alert('同じ部に同名のチームが既に存在します。'); return; }
+  const ok = await sbRun('チーム名の変更', sb.from('teams').update({ name }).eq('dept_name', dept).eq('name', oldName));
+  if (!ok) return;
+  await sbRun('社員のチーム更新', sb.from('employees').update({ team: name }).eq('dept', dept).eq('team', oldName));
+  await _masterReload();
+}
+async function masterDeleteTeam(dept, name) {
+  const usedBy = DB.members.filter(m => m.dept === dept && m.team === name);
+  if (usedBy.length) {
+    alert('チーム「' + name + '」は ' + usedBy.map(m => m.name).join('、') + ' さんに設定されているため削除できません。\n先に社員マスタで変更してください。');
+    return;
+  }
+  if (!confirm('チーム「' + name + '」（' + dept + '）を削除しますか？')) return;
+  const ok = await sbRun('チームの削除', sb.from('teams').delete().eq('dept_name', dept).eq('name', name));
+  if (ok) await _masterReload();
 }
 
 // ============================================================
