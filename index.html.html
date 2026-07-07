@@ -1,0 +1,2882 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>IWO 評価システム v3.0</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root{--navy:#1B2A4A;--navy2:#243561;--red:#C0392B;--red2:#E74C3C;--gold:#D4A017;--bg:#F4F6FB;--white:#fff;--border:#E2E6EF;--text:#1B2A4A;--sub:#6B7A99;--light:#A0AABF;--ok:#1D9E75;--ok-bg:#EAF7F2;--warn:#E67E22;--warn-bg:#FEF3E7;--danger:#C0392B;--danger-bg:#FDECEA;--info:#2980B9;--info-bg:#EBF5FB;--purple:#7F77DD;--purple-bg:#EEEDFE;--r:10px;--rs:6px;--sh:0 2px 12px rgba(27,42,74,.08);--sh2:0 8px 32px rgba(27,42,74,.14);}
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:'Hiragino Sans','Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:14px;line-height:1.6;}
+#app{display:flex;min-height:100vh;}
+#sidebar{width:230px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;}
+#main{margin-left:230px;flex:1;min-height:100vh;display:flex;flex-direction:column;}
+#topbar{height:56px;background:var(--white);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 24px;justify-content:space-between;position:sticky;top:0;z-index:50;box-shadow:0 1px 4px rgba(27,42,74,.06);}
+#content{flex:1;padding:26px 26px 40px;}
+.sb-logo{padding:18px 16px 14px;border-bottom:1px solid rgba(255,255,255,.1);}
+.sb-logo-mark{display:flex;align-items:center;gap:9px;}
+.sb-icon{width:34px;height:34px;border-radius:9px;background:var(--red);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0;}
+.sb-title{font-size:14px;font-weight:700;color:#fff;}.sb-ver{font-size:10px;color:rgba(255,255,255,.4);margin-top:1px;}
+.sb-user{padding:13px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:9px;}
+.sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--red);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0;}
+.sb-uname{font-size:12px;color:rgba(255,255,255,.9);font-weight:500;}.sb-urole{font-size:10px;color:rgba(255,255,255,.45);}
+.sb-sec{font-size:10px;font-weight:600;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;padding:16px 16px 5px;}
+.sb-nav{padding:0 9px 6px;}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:var(--rs);color:rgba(255,255,255,.6);font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;width:100%;text-align:left;margin-bottom:2px;transition:all .12s;}
+.nav-item:hover{background:rgba(255,255,255,.08);color:#fff;}.nav-item.active{background:var(--red);color:#fff;}
+.nav-icon{font-size:15px;width:18px;text-align:center;flex-shrink:0;}
+.tb-title{font-size:16px;font-weight:600;}.tb-right{display:flex;align-items:center;gap:10px;}
+.q-pill{display:inline-flex;align-items:center;gap:5px;background:var(--navy);color:#fff;border-radius:99px;font-size:12px;font-weight:600;padding:5px 12px;}
+.pg-hd{margin-bottom:20px;}.pg-title{font-size:20px;font-weight:700;color:var(--navy);margin-bottom:2px;}.pg-sub{font-size:13px;color:var(--sub);}
+.card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);border:1px solid var(--border);margin-bottom:16px;overflow:hidden;}
+.card-hd{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;}
+.card-title{font-size:14px;font-weight:600;color:var(--navy);display:flex;align-items:center;gap:6px;}
+.card-body{padding:16px 18px;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;}
+.grid6{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+.stat{background:var(--white);border-radius:var(--r);padding:16px 18px;box-shadow:var(--sh);border:1px solid var(--border);}
+.stat-lbl{font-size:11px;color:var(--sub);font-weight:500;text-transform:uppercase;letter-spacing:.04em;margin-bottom:5px;}
+.stat-val{font-size:22px;font-weight:700;color:var(--navy);line-height:1.1;}
+.stat-unit{font-size:12px;font-weight:400;color:var(--sub);margin-left:2px;}
+.stat-sub{font-size:11px;color:var(--light);margin-top:4px;}
+.at-navy{border-top:3px solid var(--navy);}.at-red{border-top:3px solid var(--red);}.at-gold{border-top:3px solid var(--gold);}.at-ok{border-top:3px solid var(--ok);}.at-purple{border-top:3px solid var(--purple);}.at-info{border-top:3px solid var(--info);}
+.badge{display:inline-flex;align-items:center;font-size:11px;font-weight:600;padding:3px 9px;border-radius:99px;white-space:nowrap;}
+.b-navy{background:var(--navy);color:#fff;}.b-red{background:var(--danger-bg);color:var(--danger);}.b-ok{background:var(--ok-bg);color:var(--ok);}.b-warn{background:var(--warn-bg);color:var(--warn);}.b-info{background:var(--info-bg);color:var(--info);}.b-gray{background:#F0F2F7;color:var(--sub);}.b-purple{background:var(--purple-bg);color:var(--purple);}.b-gold{background:#FEF9E7;color:#9A7000;}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 15px;border-radius:var(--rs);font-size:13px;font-weight:600;cursor:pointer;border:1px solid transparent;transition:all .12s;}
+.btn-navy{background:var(--navy);color:#fff;border-color:var(--navy);}.btn-navy:hover{background:var(--navy2);}
+.btn-red{background:var(--red);color:#fff;border-color:var(--red);}
+.btn-ok{background:var(--ok);color:#fff;border-color:var(--ok);}
+.btn-warn{background:var(--warn);color:#fff;border-color:var(--warn);}
+.btn-purple{background:var(--purple);color:#fff;border-color:var(--purple);}.btn-purple:hover{background:#6a62cc;}
+.btn-out{background:transparent;color:var(--navy);border-color:var(--border);}.btn-out:hover{border-color:var(--navy);background:var(--bg);}
+.btn-ghost{background:transparent;color:var(--sub);border-color:transparent;}.btn-ghost:hover{background:var(--bg);color:var(--text);}
+.btn-sm{padding:5px 11px;font-size:12px;}
+.tabs{display:flex;border-bottom:1px solid var(--border);overflow-x:auto;}
+.tab-btn{padding:10px 16px;font-size:13px;font-weight:500;border-bottom:2px solid transparent;color:var(--sub);cursor:pointer;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none;transition:all .12s;}
+.tab-btn.on{color:var(--navy);border-bottom-color:var(--navy);font-weight:600;}
+.tab-pnl{display:none;padding:16px 18px;}.tab-pnl.on{display:block;}
+.notice{border-radius:var(--rs);padding:10px 13px;margin-bottom:12px;display:flex;gap:8px;align-items:flex-start;font-size:12px;}
+.n-info{background:var(--info-bg);color:var(--info);border-left:3px solid var(--info);}
+.n-warn{background:var(--warn-bg);color:var(--warn);border-left:3px solid var(--warn);}
+.n-ok{background:var(--ok-bg);color:var(--ok);border-left:3px solid var(--ok);}
+.n-danger{background:var(--danger-bg);color:var(--danger);border-left:3px solid var(--danger);}
+.tbl-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:12px;}
+th{text-align:left;padding:8px 10px;font-size:11px;font-weight:600;color:var(--sub);border-bottom:1px solid var(--border);background:#FAFBFD;white-space:nowrap;}
+td{padding:8px 10px;border-bottom:1px solid var(--border);vertical-align:middle;}
+tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
+.num{font-family:'SF Mono',Consolas,monospace;text-align:right;font-size:12px;}
+.num-pos{color:var(--ok);font-weight:600;}.num-neg{color:var(--danger);font-weight:600;}
+.fg{display:flex;flex-direction:column;gap:4px;margin-bottom:12px;}
+.fl{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.03em;}
+.fl .req{color:var(--danger);margin-left:2px;}
+.fi,.fsel,.fta{padding:8px 11px;border:1px solid var(--border);border-radius:var(--rs);font-size:13px;color:var(--text);background:#fff;outline:none;width:100%;transition:border-color .12s;}
+.fi:focus,.fsel:focus,.fta:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(27,42,74,.07);}
+.fta{min-height:68px;resize:vertical;font-family:inherit;}
+.fgrid2{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.fgrid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;}
+.avatar{width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;flex-shrink:0;background:var(--navy);color:#fff;}
+.rank-chip{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:8px;font-size:13px;font-weight:700;}
+.steps{display:flex;align-items:center;overflow-x:auto;padding:4px 0 8px;}
+.step{display:flex;flex-direction:column;align-items:center;min-width:76px;}
+.step-dot{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+.sd-done{background:var(--ok);color:#fff;}.sd-active{background:var(--navy);color:#fff;box-shadow:0 0 0 4px rgba(27,42,74,.12);}.sd-pending{background:var(--border);color:var(--sub);}
+.step-lbl{font-size:10px;color:var(--sub);margin-top:4px;text-align:center;line-height:1.3;}
+.step-conn{flex:1;height:2px;background:var(--border);min-width:16px;}.sc-done{background:var(--ok);}
+.inline{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+.sec-div{font-size:11px;font-weight:600;color:var(--sub);text-transform:uppercase;letter-spacing:.05em;padding-bottom:5px;border-bottom:1px solid var(--border);margin:16px 0 10px;}
+.text-sub{color:var(--sub);font-size:12px;}.text-light{color:var(--light);font-size:11px;}
+.comp-lib-chip{display:inline-flex;flex-direction:column;padding:6px 10px;border-radius:var(--rs);border:1px solid var(--border);font-size:12px;cursor:pointer;margin:3px;color:var(--sub);background:#fff;transition:all .12s;max-width:260px;}
+.comp-lib-chip:hover{border-color:var(--navy);color:var(--text);}
+.comp-lib-chip.selected{background:var(--info-bg);color:var(--info);border-color:var(--info);}
+.comp-lib-chip .chip-name{font-weight:600;font-size:12px;}
+.comp-lib-chip .chip-desc{font-size:10px;color:var(--light);margin-top:2px;line-height:1.4;}
+.comp-lib-chip .chip-reverse{font-size:10px;color:#E59C8A;margin-top:2px;}
+.cat-hd{background:var(--bg);padding:8px 12px;border-radius:var(--rs);margin-bottom:6px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;border:1px solid var(--border);}
+.cat-hd:hover{background:#eaeef6;}
+.cat-body{padding:4px 0 10px;display:none;}.cat-body.open{display:block;}
+#login-page{min-height:100vh;background:var(--navy);display:flex;align-items:center;justify-content:center;}
+.login-box{background:#fff;border-radius:16px;padding:38px 34px;width:360px;box-shadow:var(--sh2);}
+.login-logo{text-align:center;margin-bottom:24px;}
+.login-icon{width:52px;height:52px;background:var(--red);border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:#fff;margin:0 auto 10px;}
+.locked-row td{opacity:.5;pointer-events:none;background:#FAFBFD;}
+.lock-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--light);background:#F0F2F7;border-radius:4px;padding:2px 6px;}
+.text-sub{color:var(--sub);font-size:12px}.text-light{color:var(--light);font-size:11px}
+.b-gold{background:#FEF9E7;color:#9A7000}.gap-4{gap:4px!important}
+</style>
+</head>
+<body>
+<div id="login-page">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="login-icon">IWO</div>
+      <h1 style="font-size:20px;font-weight:700;color:var(--navy)">評価システム</h1>
+      <p style="font-size:12px;color:var(--sub);margin-top:3px">株式会社アイダブルオー v3.4（本番接続版）</p>
+    </div>
+    <div class="fg"><label class="fl">メールアドレス</label><input class="fi" id="login-email" type="email" placeholder="taro@iwo.co.jp" autocomplete="username" onkeydown="if(event.key==='Enter')login()"></div>
+    <div class="fg" style="margin-bottom:8px"><label class="fl">パスワード</label><input class="fi" id="login-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"></div>
+    <div id="login-err" style="display:none;color:var(--danger);font-size:12px;margin-bottom:10px;line-height:1.5"></div>
+    <button class="btn btn-navy" id="login-btn" style="width:100%;justify-content:center;padding:11px;font-size:14px" onclick="login()">ログイン</button>
+    <p style="margin-top:14px;font-size:11px;color:var(--sub);text-align:center;line-height:1.6">パスワードをお忘れの場合は<br>管理者（和氣）までご連絡ください</p>
+  </div>
+</div>
+<div id="app" style="display:none">
+  <div id="sidebar">
+    <div class="sb-logo"><div class="sb-logo-mark"><div class="sb-icon">IWO</div><div><div class="sb-title">評価システム</div><div class="sb-ver">v3.4（本番接続版）</div></div></div></div>
+    <div class="sb-user"><div class="sb-avatar" id="sb-avatar">和</div><div><div class="sb-uname" id="sb-name">和氣 佑輔</div><div class="sb-urole" id="sb-role">管理者</div></div></div>
+    <div id="sb-content"></div>
+  </div>
+  <div id="main">
+    <div id="topbar">
+      <div class="tb-title" id="tb-title">ダッシュボード</div>
+      <div class="tb-right">
+        <span style="font-size:12px;color:var(--sub)" id="tb-period"></span>
+        <span class="q-pill" id="tb-q"></span>
+        <button class="btn btn-ghost btn-sm" onclick="openPassChange()">🔑 パスワード変更</button>
+        <button class="btn btn-ghost btn-sm" onclick="logout()">ログアウト</button>
+      </div>
+    </div>
+    <div id="content" style="padding:26px 26px 40px"></div>
+  </div>
+</div>
+<script>// ===== IWO評価システム v2.3 データ =====
+const DB = {
+  // 本番接続版：起動時は空。ログイン後に Supabase から全データを読み込む。
+  periods:[],currentPeriod:'',currentQ:'Q1',
+  depts:[],teams:{},positions:[],members:[],
+  fixedOTSettings:{hours:159,otHours:20,rate:1.25},
+  params:{avgWorkHours:159,incentiveRate:30,incentiveTrigger:100,bonusThreshold:80,bonusUpRate:10,pitchGeneral:1000,pitchLeader:1500,minWage:1047,minWageHours:172},
+  brightRanks:['A','B','C','D','E'],brightDist:{A:40,B:30,C:15,D:10,E:5},
+  brightLineData:{},incentiveAdjust:{},incentiveAdminConfirmed:{},
+  bonusAdjust:{},kgiData:{},compLib:[],sheets:{},
+  incentiveHistory:{},bonusHistory:{},salaryHistory:{},
+};
+
+// ===== ヘルパー =====
+const RANK_DEF=[
+  {rank:'S+',min:86,p:8,color:'#1D9E75',bg:'#EAF3DE'},{rank:'S',min:76,p:6,color:'#3B8BD4',bg:'#E6F1FB'},
+  {rank:'A+',min:71,p:4,color:'#7F77DD',bg:'#EEEDFE'},{rank:'A',min:66,p:3,color:'#9F8FE8',bg:'#F3F2FE'},
+  {rank:'B+',min:61,p:2,color:'#5CA3DC',bg:'#EAF3FB'},{rank:'B',min:56,p:1,color:'#6AAA31',bg:'#EAF3DE'},
+  {rank:'C',min:51,p:0,color:'#8A8880',bg:'#F0EFEE'},{rank:'C-',min:46,p:-1,color:'#D49B20',bg:'#FAEEDA'},
+  {rank:'D',min:36,p:-2,color:'#D05050',bg:'#FCEBEB'},{rank:'D-',min:0,p:-4,color:'#C02020',bg:'#FDF2F2'},
+];
+function getRank(s){for(const r of RANK_DEF)if(s>=r.min)return r;return RANK_DEF[RANK_DEF.length-1];}
+const BC_C=['#1D9E75','#3B8BD4','#7F77DD','#D49B20','#D05050','#C02020','#BA7517','#0F6E56'];
+const BC_B=['#EAF3DE','#E6F1FB','#EEEDFE','#FAEEDA','#FCEBEB','#FDF2F2','#FEF3E7','#E0F4F0'];
+function getBrightColor(i){return{color:BC_C[i%BC_C.length],bg:BC_B[i%BC_B.length]};}
+const ROLE_LABELS={admin:'管理者',final:'最終評価者',ev1:'1次評価者',member:'メンバー',naikan:'内勤',keiri:'経理'};
+
+// スコア計算式（Excel「素点一覧」準拠）：
+// 行動スコア ＝（Σ評価×WT ÷ ΣWT）×（コンピテンシー配点ウェイト ÷ 4）… 小数第2位切り捨て
+// 成果スコア ＝（Σ評価×WT ÷ ΣWT）×（KPI配点ウェイト ÷ 6）… 小数第2位切り捨て
+// 最終評点 ＝ 行動スコア ＋ 成果スコア（100点満点）
+function trunc2(v){return Math.floor(v*100)/100;}
+function calcSheetTotal(sheet){
+  const wsum=items=>items.reduce((a,x)=>a+(x.weight||0),0);
+  const wavg=(items)=>{const w=wsum(items);if(!w)return 0;return items.reduce((a,x)=>a+((x.finalScore??x.ev1Score??0)*(x.weight||0)),0)/w;};
+  const comp=trunc2(wavg(sheet.compItems)*(sheet.compWeight/4));
+  const kpi=trunc2(wavg(sheet.kpiItems)*(sheet.kpiWeight/6));
+  return{comp,kpi,total:trunc2(comp+kpi)};
+}
+function calcScore(sheet){
+  if(!sheet||['goal_setting','goal_wait','goal_locked'].includes(sheet.status))return null;
+  if(sheet.status!=='confirmed')return null;
+  return calcSheetTotal(sheet).total;
+}
+function getScores(pid=DB.currentPeriod){
+  const r={};
+  DB.members.filter(m=>m.eval!=='除外'&&!m.isNaikan).forEach(m=>{
+    r[m.code]={};
+    ['Q1','Q2','Q3','Q4'].forEach(q=>{r[m.code][q]=calcScore(DB.sheets[m.code]?.[pid]?.[q]);});
+  });
+  return r;
+}
+function getBrightRanks(pid,q){
+  // 優先順位：①管理者確定のブライトline → ②過去履歴のbrightMap → ③スコアからの自動仮ランク
+  const bl=DB.brightLineData?.[pid]?.[q];
+  if(bl?.adminConfirmed&&Object.keys(bl.confirmed||{}).length>0)return bl.confirmed;
+  const hist=DB.incentiveHistory[pid]?.[q];
+  if(hist?.brightMap&&Object.keys(hist.brightMap).length>0)return hist.brightMap;
+  const scores=getScores(pid);
+  const valid=DB.members.filter(m=>m.eval!=='除外'&&!m.isNaikan&&scores[m.code]?.[q]!=null)
+    .map(m=>({code:m.code,score:scores[m.code][q]})).sort((a,b)=>b.score-a.score);
+  const n=valid.length,ranks=DB.brightRanks,result={};
+  let idx=0;
+  ranks.forEach((r,ri)=>{const cnt=Math.floor(n/ranks.length)+(ri<n%ranks.length?1:0);for(let i=0;i<cnt;i++)if(idx<valid.length)result[valid[idx++].code]=r;});
+  return result;
+}
+// 賞与（基本給部分）＝（基本給＋固定残業手当＋職務手当＋役職手当）× KGI達成率（半期実績÷半期KGI）
+// ※達成率が賞与発動閾値（80%）未満の場合は支給なし
+function calcBonusBase(m,pid,half){
+  const d=DB.kgiData[pid]?.[half]||{kgi:0,gross:0};
+  if(!d.kgi)return 0;
+  const rate=d.gross/d.kgi;
+  if(rate*100<DB.params.bonusThreshold)return 0;
+  return Math.round(totalBase(m)*rate);
+}
+function calcPool(pid,q){
+  const d=DB.kgiData[pid]?.[q]||{kgi:0,gross:0};
+  return Math.max(0,(d.gross-d.kgi)*(DB.params.incentiveRate/100));
+}
+function totalBase(m){return m.base+m.posAllow+m.jobAllow+m.fixedOT;}
+function fmt(n){return typeof n==='number'?n.toLocaleString():'—';}
+function calcFixedOT(baseAfter){
+  const s=DB.fixedOTSettings;
+  return Math.round(baseAfter/s.hours*s.rate*s.otHours/1000)*1000;
+}
+function calcSalaryRow(s){
+  const fixedOTAfter=calcFixedOT(s.baseAfter);
+  const jobAllowAfter=s.jobAllowBefore+s.adjAmt;
+  const pitchChange=s.adjAmt;
+  const total=s.baseAfter+fixedOTAfter+jobAllowAfter+s.posAllow;
+  return{...s,fixedOTAfter,jobAllowAfter,pitchChange,total};
+}
+function payStatusBadge(s){
+  const m={paid:'<span class="badge b-ok">支給済</span>',pending:'<span class="badge b-warn">確定待ち</span>',no_pool:'<span class="badge b-red">支給なし</span>',future:'<span class="badge b-gray">支給予定</span>'};
+  return m[s]||'<span class="badge b-gray">—</span>';
+}
+function statusBadge(s){
+  const m={confirmed:'<span class="badge b-ok">確定済</span>',self_eval:'<span class="badge b-info">自己評価中</span>',ev1_wait:'<span class="badge b-warn">1次評価待ち</span>',ev1:'<span class="badge b-warn">1次評価中</span>',final_wait:'<span class="badge b-purple">最終評価待ち</span>',final:'<span class="badge b-purple">最終評価中</span>',admin_wait:'<span class="badge b-navy">管理者確定待ち</span>',goal_setting:'<span class="badge b-gray">目標設定中</span>',goal_wait:'<span class="badge b-warn">目標承認待ち</span>',goal_locked:'<span class="badge b-navy">目標ロック済</span>'};
+  return m[s]||'<span class="badge b-gray">未設定</span>';
+}
+let CU=null,CP='dashboard',selPid='P12',selQ='Q3',selHalf='H1',evalMember=null,evalQ='Q3',evalPid='P12';
+</script>
+<script>// ===== 給与改定計算モジュール v2.3 =====
+// Fix 1: 内勤行の列ずれ修正（colspan="6"で評価系6列をまとめ、給与列を正順表示）
+// Fix 2: メンバー・1次評価者は自分のコードのみ displayCodes でフィルタリング
+
+function calcFixedOTNew(base) {
+  const s = DB.fixedOTSettings;
+  const raw = base / s.hours * s.rate * s.otHours;
+  return Math.ceil(raw / 1000) * 1000;
+}
+
+function getPitchUnit(m) {
+  return m.pos === 'リーダー' ? DB.params.pitchLeader : DB.params.pitchGeneral;
+}
+
+function calcSalaryFull(s, m) {
+  const pitchUnit = getPitchUnit(m);
+  const pitchAmt = s.pitch * pitchUnit;
+  const baseAfter = s.baseBefore + pitchAmt;
+  const fixedOTBefore = calcFixedOTNew(s.baseBefore);
+  const fixedOTAfter = calcFixedOTNew(baseAfter);
+  const adjAmt = s.adjPitch * pitchUnit;
+  const X = (baseAfter + fixedOTAfter) - (s.baseBefore + fixedOTBefore);
+  const Y = (pitchAmt + adjAmt) - X;
+  const jobAllowAfter = s.jobAllowBefore + Y;
+  const total = baseAfter + fixedOTAfter + jobAllowAfter + s.posAllow;
+  return {
+    ...s,
+    pitchUnit,
+    pitchAmt,
+    baseAfter,
+    fixedOTBefore,
+    fixedOTAfter,
+    adjAmt,
+    X,
+    Y,
+    jobAllowAfter,
+    total,
+  };
+}
+
+function salaryRowHTML(s, m, role, confirmed, isNaikan=false) {
+  const r = calcSalaryFull(s, m);
+  const isAdmin = role === 'admin';
+  const isFinal = role === 'final';
+  const isPrivate = role === 'member' || role === 'ev1';
+  const floor = DB.params.minWage * DB.params.minWageHours;
+  const floored = r.baseAfter < floor;
+
+  if (isPrivate && !confirmed) {
+    return `<tr>
+      <td>${memberCell(m.code)}</td>
+      <td colspan="13" style="text-align:center;color:var(--light);font-style:italic">— 給与改定確定後に表示されます —</td>
+    </tr>`;
+  }
+
+  // 調整ピッチ入力は管理者のみ・未確定時・第4Q評価確定後のみ
+  const adjPitchCell = (isAdmin && !confirmed && window._salaryInputOpen)
+    ? `<input type="number" style="width:55px;font-size:12px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${s.adjPitch}" min="-10" max="10" onchange="updateSalaryPitch('${m?.code||''}',parseInt(this.value)||0)">`
+    : `<span style="font-weight:700;color:${s.adjPitch>0?'var(--ok)':s.adjPitch<0?'var(--danger)':'var(--sub)'}">${s.adjPitch>0?'+':''}${s.adjPitch}P</span>`;
+
+  // ===== FIX 1: 内勤行の列ずれ修正 =====
+  // 評価系6列（年間平均スコア・ランク・昇給ピッチ数・昇給金額・調整ピッチ数・調整金額）を
+  // colspan="6" でまとめ、残りの給与列を正しい順序（前基本給→改定基本給→固定残業手当→前職務手当→改定職務手当→役職手当→総支給額）で表示
+  if (isNaikan) {
+    const tot = r.baseAfter + r.fixedOTAfter + r.jobAllowAfter + r.posAllow;
+    return `<tr style="background:#FEF9E7">
+      <td><div class="inline"><div class="avatar" style="background:#BA7517">${m.name[0]}</div><span style="font-weight:600">${m.name}</span></div></td>
+      <td colspan="6" style="color:var(--light);text-align:center;font-size:11px">手入力（評価対象外）</td>
+      <td class="num">${fmt(s.baseBefore)}円</td>
+      <td class="num">${isAdmin&&!confirmed&&window._salaryInputOpen?`<input type="number" style="width:85px;font-size:11px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${r.baseAfter}">`:`<span style="font-weight:700">${fmt(r.baseAfter)}円</span>`}</td>
+      <td class="num" style="color:var(--info)">${fmt(r.fixedOTAfter)}円</td>
+      <td class="num">${fmt(s.jobAllowBefore)}円</td>
+      <td class="num">${isAdmin&&!confirmed&&window._salaryInputOpen?`<input type="number" style="width:75px;font-size:11px;padding:3px 5px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${r.jobAllowAfter}">`:`<span style="font-weight:600">${fmt(r.jobAllowAfter)}円</span>`}</td>
+      <td class="num">${fmt(r.posAllow)}円</td>
+      <td class="num num-pos" style="font-weight:700">${fmt(tot)}円</td>
+    </tr>`;
+  }
+
+  const rankR = s.annualAvg!=null ? getRank(s.annualAvg) : null;
+  return `<tr style="${floored?'background:var(--warn-bg)':''}">
+    <td>${memberCell(m.code)}</td>
+    <td class="num">${s.annualAvg??'—'}</td>
+    <td style="text-align:center">${rankR?`<span class="rank-chip" style="background:${rankR.bg};color:${rankR.color}">${rankR.rank}</span>`:'—'}</td>
+    <td style="text-align:center;font-weight:700;color:${s.pitch>=0?'var(--ok)':'var(--danger)'}">${s.pitch>=0?'+':''}${s.pitch}P</td>
+    <td class="num ${r.pitchAmt>=0?'num-pos':'num-neg'}">${r.pitchAmt>=0?'+':''}${fmt(r.pitchAmt)}円</td>
+    <td style="text-align:center">${adjPitchCell}</td>
+    <td class="num ${r.adjAmt>0?'num-pos':r.adjAmt<0?'num-neg':''}">${r.adjAmt>0?'+':''}${fmt(r.adjAmt)}円</td>
+    <td class="num">${fmt(s.baseBefore)}円</td>
+    <td class="num" style="font-weight:700;color:${floored?'var(--warn)':'var(--navy)'}">${fmt(r.baseAfter)}円${floored?'<span class="badge b-warn" style="font-size:9px;margin-left:4px">下限</span>':''}</td>
+    <td class="num" style="color:var(--info)">${fmt(r.fixedOTAfter)}円</td>
+    <td class="num">${fmt(s.jobAllowBefore)}円</td>
+    <td class="num" style="font-weight:600;color:${r.Y>=0?'var(--ok)':'var(--danger)'}">${fmt(r.jobAllowAfter)}円</td>
+    <td class="num">${fmt(r.posAllow)}円</td>
+    <td class="num num-pos" style="font-weight:700">${fmt(r.total)}円</td>
+  </tr>`;
+}
+
+// 給与改定の表示データを自動生成：未確定の期は社員マスタの給与と
+// 評価スコアから毎回組み立てる（調整ピッチの入力値だけは保持）。
+// 確定済みの期は保存されたデータをそのまま表示する。
+function ensureSalaryItems(pid){
+  const sal=DB.salaryHistory[pid];if(!sal||sal.finalApproved)return;
+  const scores=getScores(pid);
+  sal.items=sal.items||{};sal.naikanItems=sal.naikanItems||{};
+  DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').forEach(m=>{
+    const qv=[scores[m.code]?.Q1,scores[m.code]?.Q2,scores[m.code]?.Q3,scores[m.code]?.Q4].filter(v=>v!=null);
+    const avg=qv.length?Math.round(qv.reduce((a,v)=>a+v,0)/qv.length*10)/10:null;
+    const rk=avg!=null?getRank(avg):null;
+    const prev=sal.items[m.code]||{};
+    sal.items[m.code]={
+      annualAvg:avg,rank:rk?rk.rank:null,pitch:rk?rk.p:0,
+      adjPitch:prev.adjPitch||0,
+      baseBefore:m.base||0,jobAllowBefore:m.jobAllow||0,
+      posAllow:m.posAllow||0,commute:m.commute||0,
+    };
+  });
+  DB.members.filter(m=>m.isNaikan).forEach(m=>{
+    const prev=sal.naikanItems[m.name]||{};
+    sal.naikanItems[m.name]={
+      annualAvg:null,rank:null,pitch:0,
+      adjPitch:prev.adjPitch||0,
+      baseBefore:m.base||0,jobAllowBefore:m.jobAllow||0,
+      posAllow:m.posAllow||0,commute:m.commute||0,
+    };
+  });
+}
+function renderSalaryV22() {
+  const isAdmin = CU.role === 'admin';
+  const isFinal = CU.role === 'final';
+  const isKeiri = CU.role === 'keiri';
+  const isPrivate = CU.role === 'member' || CU.role === 'ev1';
+  // 最終評価者: 全員閲覧のみ（リアルタイム＆確定分）
+  // メンバー・1次: 自分のみ・確定後のみ
+  // 経理: 閲覧のみ（確定後）
+
+  const sal = DB.salaryHistory[selPid];
+  if (!sal) return `<div class="pg-hd"><div class="pg-title">給与改定</div></div>${periodOnlySelector('renderPage(CP)')}データなし`;
+  ensureSalaryItems(selPid);
+  if (isKeiri && !sal.finalApproved) return `<div class="pg-hd"><div class="pg-title">給与改定</div></div>${periodOnlySelector('renderPage(CP)')}<div class="notice n-info"><span>ℹ️</span><span>給与改定は管理者が最終確定するまでは閲覧できません。</span></div><div class="card"><div class="card-body" style="text-align:center;padding:24px;color:var(--sub)">確定待ち</div></div>`;
+
+  const confirmed = sal.finalApproved;
+  const adjApproved = sal.adjApproved;
+  // 給与改定は年1回：その期の第4Q評価が全員確定してから入力可能
+  const q4Done = DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').every(m=>DB.sheets[m.code]?.[selPid]?.Q4?.status==='confirmed');
+  const salaryInputOpen = q4Done || confirmed;
+  const q4Notice = (!q4Done && !confirmed && (isAdmin||isFinal))
+    ? `<div class="notice n-warn"><span>⚠️</span><span>第4Q（2〜4月）の評価がまだ確定していません。全員の第4Q評価を管理者が最終確定すると、給与改定の入力が可能になります。</span></div>`
+    : '';
+  const floor = DB.params.minWage * DB.params.minWageHours;
+  const evalMs = DB.members.filter(m => !m.isNaikan && m.eval !== '除外');
+  const naikanMs = DB.members.filter(m => m.isNaikan);
+
+  let grandTotal = 0;
+  evalMs.forEach(m => {
+    const s = sal.items[m.code]; if (!s) return;
+    const r = calcSalaryFull(s, m);
+    grandTotal += r.total;
+  });
+  naikanMs.forEach(m => {
+    const s = sal.naikanItems?.[m.name]; if (!s) return;
+    const r = calcSalaryFull(s, m);
+    grandTotal += r.total;
+  });
+
+  const calcNote = `
+  <div style="background:var(--bg);border-radius:var(--rs);padding:12px 14px;margin-bottom:12px;font-size:12px;line-height:2;color:var(--sub)">
+    <div style="font-weight:600;color:var(--navy);margin-bottom:4px">📐 計算式</div>
+    <div>固定残業手当 ＝ 基本給 ÷ <strong>${DB.fixedOTSettings.hours}h</strong> × 1.25 × 20h（1,000円単位切り上げ）</div>
+    <div>昇給金額 ＝ 昇給ピッチ数 × ピッチ単価（一般：${fmt(DB.params.pitchGeneral)}円 / リーダー：${fmt(DB.params.pitchLeader)}円）</div>
+    <div>改定基本給 ＝ 前基本給 ＋ 昇給金額</div>
+    <div>X ＝（改定基本給＋改定固定残業手当）ー（前基本給＋前固定残業手当）</div>
+    <div>Y ＝（昇給金額＋調整金額）ー X　→　改定職務手当 ＝ 前職務手当 ＋ Y（マイナスなら差し引き）</div>
+    <div>総支給額 ＝ 改定基本給 ＋ 改定固定残業手当 ＋ 改定職務手当 ＋ 役職手当</div>
+    <div style="color:var(--light)">※最低賃金下限：${fmt(floor)}円（岡山県${DB.params.minWage}円×${DB.params.minWageHours}h）</div>
+  </div>`;
+
+  const statusBadgeHTML = confirmed
+    ? '<span class="badge b-ok">確定済 🔒</span>'
+    : adjApproved
+      ? '<span class="badge b-purple">最終評価者承認済 → 管理者承認待ち</span>'
+      : '<span class="badge b-warn">調整ピッチ入力中</span>';
+
+  const thead = `<thead><tr>
+    <th>氏名</th>
+    <th style="text-align:right">年間平均<br>スコア</th>
+    <th style="text-align:center">ランク</th>
+    <th style="text-align:center">昇給<br>ピッチ数</th>
+    <th style="text-align:right">昇給金額</th>
+    <th style="text-align:center">調整<br>ピッチ数</th>
+    <th style="text-align:right">調整金額</th>
+    <th style="text-align:right">前基本給</th>
+    <th style="text-align:right">改定基本給</th>
+    <th style="text-align:right">固定残業<br>手当</th>
+    <th style="text-align:right">前職務<br>手当</th>
+    <th style="text-align:right">改定職務<br>手当</th>
+    <th style="text-align:right">役職手当</th>
+    <th style="text-align:right">総支給額</th>
+  </tr></thead>`;
+
+  // メンバー・1次: 自分のみ。最終評価者・経理・管理者: 全員
+  const displayCodes = isPrivate ? evalMs.filter(m => m.code === CU.code) : evalMs;
+  window._salaryInputOpen = salaryInputOpen;
+  const memberRows = displayCodes.map(m => {
+    const s = sal.items[m.code]; if (!s) return '';
+    return salaryRowHTML(s, m, CU.role, confirmed, false);
+  }).join('');
+
+  const naikanRowsHTML = (isAdmin || isFinal || isKeiri) ? `
+    <tr style="background:#FEF3E7">
+      <td colspan="14" style="font-size:11px;font-weight:600;color:#9A7000;padding:6px 10px">▼ 内勤（手入力）</td>
+    </tr>
+    ${naikanMs.map(m => {
+      const s = sal.naikanItems?.[m.name]; if (!s) return '';
+      return salaryRowHTML(s, m, CU.role, confirmed, true);
+    }).join('')}` : '';
+
+  // 承認エリア: 管理者のみ最終確定ボタン
+  let approvalArea = '';
+  if (isAdmin) {
+    if (!confirmed) {
+      approvalArea = salaryInputOpen ? `
+      <div style="padding:14px 18px;border-top:1px solid var(--border);background:var(--ok-bg);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <span style="font-size:13px;color:var(--ok);font-weight:600">調整ピッチを確認後、最終確定してください（リアルタイムで総支給額を確認できます）</span>
+        <button class="btn btn-navy btn-sm" onclick="salaryAdminFinal('${selPid}')">🔒 最終確定</button>
+        <button class="btn btn-out btn-sm">📥 MoneyForward CSV</button>
+      </div>` : `
+      <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center">
+        <button class="btn btn-navy btn-sm" disabled style="opacity:.45;cursor:not-allowed">🔒 最終確定</button>
+        <span style="font-size:12px;color:var(--sub)">※第4Q評価の全員確定後に入力・確定できます</span>
+      </div>`;
+    } else {
+      approvalArea = `
+      <div style="padding:14px 18px;border-top:1px solid var(--border);display:flex;gap:10px;align-items:center">
+        <span class="badge b-ok">確定済 🔒</span>
+        <span style="font-size:12px;color:var(--sub)">社員マスタへ自動反映済み — 最終評価者・メンバーへ反映されています</span>
+        <button class="btn btn-out btn-sm">📥 MoneyForward CSV</button>
+      </div>`;
+    }
+  }
+
+  // お知らせ表示
+  const noticeOrCalc = isPrivate && !confirmed
+    ? `<div class="notice n-info"><span>ℹ️</span><span>給与改定は管理者が最終確定するまでは非表示です。確定後に自動表示されます。</span></div>`
+    : isPrivate && confirmed
+      ? `<div class="notice n-info"><span>ℹ️</span><span>自分の給与改定内容のみ表示されています。</span></div>`
+    : isKeiri && !confirmed
+      ? `<div class="notice n-info"><span>ℹ️</span><span>給与改定は管理者が最終確定するまでは表示されません。</span></div>`
+    : isFinal
+      ? `<div class="notice n-info"><span>ℹ️</span><span>全員分の給与改定を閲覧できます（入力は管理者のみ）。</span></div>`
+      : calcNote;
+
+  return `
+  <div class="pg-hd">
+    <div class="pg-title">給与改定</div>
+    <div class="pg-sub">ピッチ単価制 / 固定残業手当＝基本給÷${DB.fixedOTSettings.hours}h×1.25×20h（1,000円切り上げ）</div>
+  </div>
+  ${periodOnlySelector('renderPage(CP)')}
+  ${q4Notice}
+  ${noticeOrCalc}
+  <div class="card">
+    <div class="card-hd">
+      <span class="card-title">💴 ${DB.periods.find(x => x.id === selPid)?.label || selPid} 給与改定</span>
+      <div class="inline gap-4">${statusBadgeHTML}</div>
+    </div>
+    <div class="tbl-wrap">
+      <table>${thead}
+        <tbody>
+          ${memberRows}
+          ${naikanRowsHTML}
+        </tbody>
+        ${!isPrivate || confirmed ? `<tfoot>
+          <tr style="background:var(--navy)">
+            <td colspan="13" style="text-align:right;font-weight:600;color:#fff;padding:10px">総支給額 合計</td>
+            <td class="num" style="font-size:14px;font-weight:700;color:#fff">${fmt(grandTotal)}円</td>
+          </tr>
+        </tfoot>` : ''}
+      </table>
+    </div>
+    ${approvalArea}
+  </div>
+  ${!isPrivate ? `
+  <div style="margin-top:12px;padding:12px 16px;background:var(--bg);border-radius:var(--rs);border:1px solid var(--border);font-size:12px;color:var(--sub)">
+    <div style="font-weight:600;color:var(--navy);margin-bottom:6px">🔢 計算根拠サンプル</div>
+    ${(() => {
+      const codes = Object.keys(DB.salaryHistory[selPid]?.items || {});
+      const sampleCode = codes.find(c => DB.members.find(x => x.code === c)?.pos === 'リーダー') || codes[0];
+      const s = DB.salaryHistory[selPid]?.items?.[sampleCode];
+      const m = DB.members.find(x => x.code === sampleCode);
+      if (!s || !m) return '—';
+      const r = calcSalaryFull(s, m);
+      return `
+      <div>昇給金額：${s.pitch}P × ${fmt(r.pitchUnit)}円 ＝ <strong>${fmt(r.pitchAmt)}円</strong></div>
+      <div>改定基本給：${fmt(s.baseBefore)}円 ＋ ${fmt(r.pitchAmt)}円 ＝ <strong>${fmt(r.baseAfter)}円</strong></div>
+      <div>前固定残業手当：${fmt(s.baseBefore)}÷${DB.fixedOTSettings.hours}h×1.25×20h ＝ <strong>${fmt(r.fixedOTBefore)}円</strong></div>
+      <div>改定固定残業手当：${fmt(r.baseAfter)}÷${DB.fixedOTSettings.hours}h×1.25×20h ＝ <strong>${fmt(r.fixedOTAfter)}円</strong></div>
+      <div>調整金額：${s.adjPitch}P × ${fmt(r.pitchUnit)}円 ＝ <strong>${fmt(r.adjAmt)}円</strong></div>
+      <div>X＝（${fmt(r.baseAfter)}＋${fmt(r.fixedOTAfter)}）ー（${fmt(s.baseBefore)}＋${fmt(r.fixedOTBefore)}）＝ <strong>${fmt(r.X)}円</strong></div>
+      <div>Y＝（${fmt(r.pitchAmt)}＋${fmt(r.adjAmt)}）ー ${fmt(r.X)} ＝ <strong style="color:${r.Y>=0?'var(--ok)':'var(--danger)'}">${r.Y>=0?'+':''}${fmt(r.Y)}円</strong></div>
+      <div>改定職務手当：${fmt(s.jobAllowBefore)}円 ＋ ${r.Y>=0?'+':''}${fmt(r.Y)}円 ＝ <strong>${fmt(r.jobAllowAfter)}円</strong></div>
+      <div>総支給額：${fmt(r.baseAfter)}＋${fmt(r.fixedOTAfter)}＋${fmt(r.jobAllowAfter)}＋${fmt(r.posAllow)} ＝ <strong style="color:var(--navy)">${fmt(r.total)}円</strong></div>`;
+    })()}
+  </div>` : ''}`;
+}
+</script>
+<script>// ===== SHARED HELPERS =====
+function memberCell(code,isNaikan=false){
+  if(isNaikan){const nm=DB.members.find(m=>m.isNaikan&&m.name===code);return nm?`<div class="inline"><div class="avatar" style="background:#BA7517">${nm.name[0]}</div><div><div style="font-weight:600;font-size:13px">${nm.name}</div><div style="font-size:11px;color:var(--light)">内勤・${nm.team}</div></div></div>`:'—';}
+  const m=DB.members.find(x=>x.code===code);
+  return m?`<div class="inline"><div class="avatar">${m.name[0]}</div><div><div style="font-weight:600;font-size:13px">${m.name}</div><div style="font-size:11px;color:var(--light)">${m.pos}・${m.team||m.dept}</div></div></div>`:'—';
+}
+function rankChip(s){if(s==null)return'<span style="color:var(--light)">—</span>';const r=getRank(s);return`<span class="rank-chip" style="background:${r.bg};color:${r.color}">${r.rank}</span>`;}
+function brightChip(b){if(!b||b==='—')return'<span style="color:var(--light)">—</span>';const i=DB.brightRanks.indexOf(b);const bc=i>=0?getBrightColor(i):{color:'var(--sub)',bg:'#F0F2F7'};return`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:12px;font-weight:800;background:${bc.bg};color:${bc.color}">${b}</span>`;}
+function scoreChip(s,max){if(s==null)return'<span style="color:var(--light)">—</span>';const bgs=['','#FDF2F2','#FAEEDA','#EAF3DE','#E6F1FB','#EAF3DE','#E6F1FB'];const clrs=['','#922B21','#7D6608','#1D6A3A','#1A5276','#27500A','#0C447C'];return`<span style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:6px;font-size:12px;font-weight:700;background:${bgs[s]||'#eee'};color:${clrs[s]||'#333'}">${s}</span>`;}
+// 給与改定用：期のプルダウンのみ（年1回改訂のためQタブなし）
+function periodOnlySelector(cb){
+  return`<div class="inline" style="margin-bottom:14px;gap:8px">
+    <select class="fsel" style="width:200px" onchange="selPid=this.value;${cb}">
+      ${DB.periods.map(p=>`<option value="${p.id}" ${p.id===selPid?'selected':''}>${p.label}${p.year?`（${p.year}）`:''}</option>`).join('')}
+    </select>
+  </div>`;
+}
+function periodSelector(cb){
+  return`<div class="inline" style="margin-bottom:14px;gap:8px">
+    <select class="fsel" style="width:200px" onchange="selPid=this.value;selQ='Q1';${cb}">
+      ${DB.periods.map(p=>`<option value="${p.id}" ${p.id===selPid?'selected':''}>${p.label}（${p.year}）</option>`).join('')}
+    </select>
+    <div class="inline gap-4">${['Q1','Q2','Q3','Q4'].map(q=>{const qd=DB.periods.find(x=>x.id===selPid)?.qs[q];return`<button class="btn btn-sm ${q===selQ?'btn-navy':'btn-out'}" onclick="selQ='${q}';${cb}">${q}<div style="font-size:9px;font-weight:400">${qd?.label?.replace(/Q\d（/,'').replace('）','')||''}</div></button>`;}).join('')}</div>
+  </div>`;
+}
+function halfSelector(cb){
+  return`<div class="inline" style="margin-bottom:14px;gap:8px">
+    <select class="fsel" style="width:200px" onchange="selPid=this.value;selHalf='H1';${cb}">
+      ${DB.periods.map(p=>`<option value="${p.id}" ${p.id===selPid?'selected':''}>${p.label}（${p.year}）</option>`).join('')}
+    </select>
+    <button class="btn btn-sm ${selHalf==='H1'?'btn-navy':'btn-out'}" onclick="selHalf='H1';${cb}">上期（Q1+Q2）</button>
+    <button class="btn btn-sm ${selHalf==='H2'?'btn-navy':'btn-out'}" onclick="selHalf='H2';${cb}">下期（Q3+Q4）</button>
+  </div>`;
+}
+function approveBar(confirmed,adjApproved,finalApproved,type){
+  const isAdmin=CU.role==='admin',isFinal=CU.role==='final',isKeiri=CU.role==='keiri';
+  if(isKeiri||confirmed)return'';
+  return`<div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    ${type==='incentive'?`${!confirmed&&(isAdmin||isFinal)?'<button class="btn btn-ok btn-sm">✅ 支給確定</button>':''}
+      ${isAdmin||isFinal?'<button class="btn btn-out btn-sm" style="color:var(--danger)">↩ 差し戻し</button>':''}
+      <button class="btn btn-out btn-sm">📥 CSV出力</button>`:
+    type==='bonus'?`${isFinal&&!adjApproved?'<button class="btn btn-warn btn-sm">✅ 最終評価者として承認</button>':''}
+      ${isAdmin&&adjApproved&&!finalApproved?'<button class="btn btn-navy btn-sm">🔒 管理者として最終承認・確定</button>':''}
+      ${isAdmin||isFinal?'<button class="btn btn-out btn-sm" style="color:var(--danger)">↩ 差し戻し</button>':''}
+      <button class="btn btn-out btn-sm">📥 CSV出力</button>`:
+    type==='salary'?`${isFinal&&!adjApproved?'<button class="btn btn-warn btn-sm">✅ 調整ピッチを承認（1段目）</button>':''}
+      ${isAdmin&&adjApproved&&!finalApproved?'<button class="btn btn-navy btn-sm">🔒 管理者として最終承認・確定</button>':''}
+      ${isAdmin||isFinal?'<button class="btn btn-out btn-sm" style="color:var(--danger)">↩ 差し戻し</button>':''}
+      <button class="btn btn-out btn-sm">📥 MoneyForward CSV</button>`:''}
+  </div>`;
+}
+
+// ===== DASHBOARD =====
+function renderDashboard(){
+  const isPrivate=CU.role==='member'||CU.role==='ev1';
+  if(isPrivate)return renderMyDashboard();
+  return renderAdminDashboard();
+}
+function renderAdminDashboard(){
+  const scores=getScores(DB.currentPeriod);const bright=getBrightRanks(DB.currentPeriod,DB.currentQ);const pool=calcPool(DB.currentPeriod,DB.currentQ);
+  const kgiD=DB.kgiData[DB.currentPeriod]?.[DB.currentQ]||{kgi:0,gross:0};
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const rows=evalMs.map(m=>{
+    const s=scores[m.code];const b=bright[m.code]||'—';const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+    const sheet=DB.sheets[m.code]?.[DB.currentPeriod]?.[DB.currentQ];
+    return`<tr><td>${memberCell(m.code)}</td><td class="num">${s?.Q1??'—'}</td><td class="num">${s?.Q2??'—'}</td><td class="num">${s?.Q3??'—'}</td><td style="text-align:center">${s?.Q3?rankChip(s.Q3):'<span style="color:var(--warn)">評価中</span>'}</td><td style="text-align:center"><span style="padding:2px 10px;border-radius:6px;font-size:12px;font-weight:700;background:${bc.bg};color:${bc.color}">${b}</span></td><td>${statusBadge(sheet?.status||'goal_setting')}</td></tr>`;
+  }).join('');
+  return`<div class="pg-hd"><div class="pg-title">ダッシュボード</div><div class="pg-sub">${DB.periods.find(p=>p.id===DB.currentPeriod)?.label||''} ${DB.periods.find(p=>p.id===DB.currentPeriod)?.qs?.[DB.currentQ]?.label||DB.currentQ}</div></div>
+  <div class="grid4" style="margin-bottom:16px">
+    <div class="stat at-navy"><div class="stat-lbl">評価対象</div><div class="stat-val">${evalMs.length}<span class="stat-unit">名</span></div></div>
+    <div class="stat at-red"><div class="stat-lbl">${DB.currentQ} KGI</div><div class="stat-val">${fmt(kgiD.kgi)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat at-gold"><div class="stat-lbl">${DB.currentQ} 粗利実績</div><div class="stat-val">${fmt(kgiD.gross)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat at-ok"><div class="stat-lbl">${DB.currentQ} インセンティブ原資</div><div class="stat-val" style="font-size:18px">${pool.toFixed(1)}<span class="stat-unit">万円</span></div></div>
+  </div>
+  <div class="card"><div class="card-hd"><span class="card-title">📊 メンバー別スコア（${DB.periods.find(p=>p.id===DB.currentPeriod)?.label||''}）</span><span class="badge b-navy">Q1〜${DB.currentQ}</span></div>
+  <div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th style="text-align:right">Q1</th><th style="text-align:right">Q2</th><th style="text-align:right">Q3</th><th style="text-align:center">ランク</th><th style="text-align:center">ブライトline</th><th>ステータス</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function renderMyDashboard(){
+  const code=CU.code;const scores=getScores(DB.currentPeriod)[code]||{};const bright=getBrightRanks(DB.currentPeriod,DB.currentQ);
+  const b=bright[code];const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+  const pool=calcPool(DB.currentPeriod,DB.currentQ);const kgiD=DB.kgiData[DB.currentPeriod]?.[DB.currentQ]||{kgi:0,gross:0};
+  const myAvg=[scores.Q1,scores.Q2,scores.Q3,scores.Q4].filter(v=>v!=null);
+  const avgV=myAvg.length?(myAvg.reduce((a,v)=>a+v,0)/myAvg.length).toFixed(1):'—';
+  const histRows=['Q4','Q3','Q2','Q1'].map(q=>{
+    const s=scores[q];const sheet=DB.sheets[code]?.[DB.currentPeriod]?.[q];if(!sheet)return'';
+    return`<tr><td style="font-weight:600">${DB.periods[0].qs[q]?.label||q}</td><td class="num">${s??'—'}</td><td style="text-align:center">${s?rankChip(s):'<span style="color:var(--warn)">評価中</span>'}</td><td style="text-align:center">${q===DB.currentQ&&b?brightChip(b):'—'}</td><td>${statusBadge(sheet.status)}</td></tr>`;
+  }).join('');
+  const distRows=DB.brightRanks.map((r,i)=>{const bci=getBrightColor(i);const rp=(pool*(DB.brightDist[r]||0)/100).toFixed(2);return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)"><span style="width:26px;height:26px;border-radius:6px;background:${bci.bg};color:${bci.color};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${r}</span><span style="flex:1;font-size:12px;color:var(--sub)">ランク${r}配分</span><span style="font-family:monospace;font-size:13px;font-weight:600;color:var(--navy)">${rp}万円</span></div>`;}).join('');
+  return`<div class="pg-hd"><div class="pg-title">マイダッシュボード</div><div class="pg-sub">${CU.name}（${CU.pos}）${DB.periods.find(p=>p.id===DB.currentPeriod)?.label||''}</div></div>
+  <div class="grid6" style="margin-bottom:16px">
+    <div class="stat at-navy"><div class="stat-lbl">評価対象</div><div class="stat-val">${DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').length}<span class="stat-unit">名</span></div></div>
+    <div class="stat at-red"><div class="stat-lbl">${DB.currentQ} KGI</div><div class="stat-val" style="font-size:16px">${fmt(kgiD.kgi)}<span class="stat-unit">万</span></div></div>
+    <div class="stat at-gold"><div class="stat-lbl">${DB.currentQ} 実績</div><div class="stat-val" style="font-size:16px">${fmt(kgiD.gross)}<span class="stat-unit">万</span></div></div>
+    <div class="stat at-ok"><div class="stat-lbl">${DB.currentQ} 原資</div><div class="stat-val" style="font-size:16px">${pool.toFixed(1)}<span class="stat-unit">万</span></div></div>
+    <div class="stat at-info"><div class="stat-lbl">評価フェーズ</div><div class="stat-val" style="font-size:14px">${DB.currentQ}進行中</div></div>
+    <div class="stat at-purple"><div class="stat-lbl">年間平均スコア</div><div class="stat-val" style="font-size:18px">${avgV}<span class="stat-unit">点</span></div></div>
+  </div>
+  <div class="grid2">
+    <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">📊 自分のスコア履歴</span></div>
+    <div class="tbl-wrap"><table><thead><tr><th>期間</th><th style="text-align:right">スコア</th><th style="text-align:center">ランク</th><th style="text-align:center">ブライトline</th><th>ステータス</th></tr></thead><tbody>${histRows}</tbody></table></div></div>
+    <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">💰 Q3 インセンティブ試算</span></div><div class="card-body"><div style="text-align:center;padding:6px 0 14px"><div class="stat-val">${pool.toFixed(2)}<span class="stat-unit">万円</span></div></div>${distRows}<div style="font-size:11px;color:var(--light);margin-top:8px">※個人名は非公開</div></div></div>
+  </div>`;
+}
+
+// ===== BRIGHT LINE =====
+// ブライトlineランク入力セル生成
+function blRankInput(currentVal, onchange, disabled=false){
+  const ranks=DB.brightRanks;
+  if(disabled){
+    if(!currentVal)return'<span style="color:var(--light)">—</span>';
+    const i=ranks.indexOf(currentVal);const bc=i>=0?getBrightColor(i):{color:'var(--sub)',bg:'#F0F2F7'};
+    return`<span style="display:inline-flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:7px;font-size:13px;font-weight:800;background:${bc.bg};color:${bc.color}">${currentVal}</span>`;
+  }
+  return`<select style="width:62px;font-size:13px;font-weight:700;padding:4px 5px;border:1px solid var(--border);border-radius:var(--rs);text-align:center" onchange="${onchange}">
+    <option value="">—</option>
+    ${ranks.map(r=>`<option value="${r}" ${currentVal===r?'selected':''}>${r}</option>`).join('')}
+  </select>`;
+}
+
+function renderBright(){
+  const isAdmin=CU.role==='admin';
+  const isFinal=CU.role==='final';
+  const isPrivate=CU.role==='member'||CU.role==='ev1'||CU.role==='keiri';
+  const pool=calcPool(selPid,selQ);
+  const scores=getScores(selPid);
+  const blData=DB.brightLineData?.[selPid]?.[selQ]||{ev1:{},ev2:{},confirmed:{},adminConfirmed:false};
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const finalMembers=DB.members.filter(m=>m.role==='final');
+  // 管理者の確定BL or 旧brightMap
+  const confirmedBL=blData.confirmed||{};
+  const adminConfirmed=blData.adminConfirmed||false;
+
+  // メンバー・1次評価者・経理: 自分の確定ランクのみ表示
+  if(isPrivate){
+    const myRank=confirmedBL[CU.code];
+    const bi=DB.brightRanks.indexOf(myRank);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+    const incDone=DB.incentiveAdminConfirmed?.[selPid]?.[selQ]||false;
+    const incAdj=DB.incentiveAdjust?.[selPid]?.[selQ]?.[CU.code]||0;
+    const myAmt=myRank?((pool*(DB.brightDist[myRank]||0)/100)+incAdj).toFixed(2):'—';
+    return`<div class="pg-hd"><div class="pg-title">ブライトline</div><div class="pg-sub">自分のランク（${selPid} ${selQ}）</div></div>
+    ${periodSelector('renderPage(CP)')}
+    <div class="card"><div class="card-body" style="text-align:center;padding:28px">
+    ${adminConfirmed&&incDone&&myRank?`
+      <div style="font-size:13px;color:var(--sub);margin-bottom:8px">確定ブライトlineランク（${selQ}）</div>
+      <div style="font-size:60px;font-weight:800;color:${bc.color};line-height:1">${myRank}</div>
+      <div style="font-size:14px;font-weight:600;margin-top:8px">配分率：${DB.brightDist[myRank]||0}%</div>
+      <div style="font-size:20px;font-weight:700;color:var(--ok);margin-top:4px">${myAmt}万円</div>
+    `:`<div style="color:var(--sub);padding:20px">管理者がブライトlineとインセンティブを最終確定すると、ここにランクと支給額が表示されます</div>`}
+    </div></div>`;
+  }
+
+  // スコア順でソート
+  const sorted=evalMs.map(m=>({...m,score:scores[m.code]?.[selQ]})).sort((a,b)=>(b.score||0)-(a.score||0));
+
+  // 最終評価者画面
+  if(isFinal){
+    const myEv1Key=CU.code;
+    const myBL=blData.ev1?.[myEv1Key]||{};
+    // 担当メンバーを自分のevFinal
+    const myMs=evalMs.filter(m=>m.evFinal===CU.code);
+    const rows=sorted.map((m,i)=>{
+      const isMine=m.evFinal===CU.code;
+      const curRank=myBL[m.code]||'';
+      const cBL=confirmedBL[m.code]||'';
+      const ci=DB.brightRanks.indexOf(cBL);const cbc=ci>=0?getBrightColor(ci):{color:'var(--sub)',bg:'#F0F2F7'};
+      const distRate=curRank?(DB.brightDist[curRank]||0):0;
+      const amt=curRank?((pool*distRate/100)).toFixed(2):'—';
+      const r=m.score?getRank(m.score):null;
+      return`<tr ${!isMine?'style="opacity:.5"':''}>
+        <td style="font-size:14px;font-weight:700;color:var(--light)">${i+1}</td>
+        <td>${memberCell(m.code)}</td>
+        <td>${m.score!=null?`<div class="inline gap-4">${rankChip(m.score)}<span style="font-weight:700">${m.score}</span></div>`:'<span style="color:var(--warn);font-size:11px">評価確定待ち</span>'}</td>
+        <td style="text-align:center">${isMine&&!adminConfirmed?blRankInput(curRank,`setBLRank('${selPid}','${selQ}','${CU.code}','${m.code}',this.value)`):blRankInput(curRank,'',true)}</td>
+        <td class="num">${distRate}%</td>
+        <td class="num num-pos">${amt}万円</td>
+      </tr>`;
+    }).join('');
+    const myApproved=blData._ev1Approved?.[CU.code]||false;
+    return`<div class="pg-hd"><div class="pg-title">ブライトline</div><div class="pg-sub">担当メンバーのランクを入力してください</div></div>
+    ${periodSelector('renderPage(CP)')}
+    <div class="notice n-info"><span>ℹ️</span><span>担当メンバー（${myMs.map(m=>m.name).join('・')||'なし'}）のランクを入力後、「承認」ボタンを押してください。</span></div>
+    <div class="card"><div class="card-hd">
+      <span class="card-title">🏆 ブライトline入力（${selPid} ${selQ}）</span>
+      <span class="badge b-navy">原資 ${pool.toFixed(2)}万円</span>
+    </div>
+    <div class="tbl-wrap"><table><thead><tr>
+      <th>順位</th><th>メンバー</th><th>スコア</th>
+      <th style="text-align:center">BL_${CU.name.slice(0,3)}（入力）</th>
+      <th style="text-align:right">配分率</th><th style="text-align:right">個人支給額</th>
+    </tr></thead><tbody>${rows}</tbody></table></div>
+    ${!adminConfirmed?`<div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center">
+      ${myApproved?'<span class="badge b-ok">✅ 承認済 — 管理者の確定待ち</span>':
+      `<button class="btn btn-ok btn-sm" onclick="approveBL('${selPid}','${selQ}','${CU.code}')">✅ 承認して管理者へ送付</button>`}
+      <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="if(confirm('入力内容をリセットしますか？')){resetBL('${selPid}','${selQ}','${CU.code}')}">↩ リセット</button>
+    </div>`:'<div style="padding:10px 18px"><span class="badge b-ok">✅ 管理者が確定済み</span></div>'}
+    </div>`;
+  }
+
+  // 管理者画面
+  const ev1Approved=blData._ev1Approved||{};
+  const rows=sorted.map((m,i)=>{
+    const r=m.score?getRank(m.score):null;
+    // 各最終評価者のBL
+    const blByFinal={};
+    finalMembers.forEach(f=>{blByFinal[f.code]=(blData.ev1?.[f.code]||{})[m.code]||'';});
+    const confirmedRank=confirmedBL[m.code]||'';
+    const ci=DB.brightRanks.indexOf(confirmedRank);const cbc=ci>=0?getBrightColor(ci):{color:'var(--sub)',bg:'#F0F2F7'};
+    const distRate=confirmedRank?(DB.brightDist[confirmedRank]||0):0;
+    const amt=confirmedRank?((pool*distRate/100)).toFixed(2):'—';
+    return`<tr>
+      <td style="font-size:14px;font-weight:700;color:var(--light)">${i+1}</td>
+      <td>${memberCell(m.code)}</td>
+      <td>${m.score!=null?`<div class="inline gap-4">${rankChip(m.score)}<span style="font-weight:700">${m.score}</span></div>`:'<span style="color:var(--warn);font-size:11px">確定待ち</span>'}</td>
+      ${finalMembers.map(f=>`<td style="text-align:center">${blRankInput(blByFinal[f.code],'',true)}</td>`).join('')}
+      <td style="text-align:center">${adminConfirmed?blRankInput(confirmedRank,'',true):blRankInput(confirmedRank,`setConfirmedBL('${selPid}','${selQ}','${m.code}',this.value)`)}</td>
+      <td class="num">${distRate}%</td>
+      <td class="num num-pos">${amt}万円</td>
+    </tr>`;
+  }).join('');
+  const allApproved=finalMembers.length>0&&finalMembers.every(f=>ev1Approved[f.code]);
+  return`<div class="pg-hd"><div class="pg-title">ブライトline</div><div class="pg-sub">相対評価・確定ブライトline入力（管理者）</div></div>
+  ${periodSelector('renderPage(CP)')}
+  ${!allApproved?`<div class="notice n-warn"><span>⚠️</span><span>最終評価者からの承認待ちです（${finalMembers.filter(f=>!ev1Approved[f.code]).map(f=>f.name).join('・')}）</span></div>`:''}
+  <div class="card"><div class="card-hd">
+    <span class="card-title">🏆 ブライトline（${selPid} ${selQ}）</span>
+    <div class="inline gap-4"><span class="badge b-navy">原資 ${pool.toFixed(2)}万円</span>${adminConfirmed?'<span class="badge b-ok">✅ 確定済</span>':'<span class="badge b-warn">確定待ち</span>'}</div>
+  </div>
+  <div class="tbl-wrap"><table><thead><tr>
+    <th>順位</th><th>メンバー</th><th>スコア</th>
+    ${finalMembers.map(f=>`<th style="text-align:center">BL_${f.name.slice(0,3)}</th>`).join('')}
+    <th style="text-align:center">確定BL</th>
+    <th style="text-align:right">配分率</th><th style="text-align:right">個人支給額</th>
+  </tr></thead><tbody>${rows}</tbody></table></div>
+  <div style="padding:12px 18px;border-top:1px solid var(--border);display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    ${!adminConfirmed?`<button class="btn btn-navy btn-sm" onclick="adminConfirmBL('${selPid}','${selQ}')">🔒 確定ブライトlineを確定</button>`:'<span class="badge b-ok">✅ 確定済 — メンバーへ反映済み</span>'}
+    ${adminConfirmed?'':'<button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="adminReturnBL()">↩ 最終評価者へ差し戻し</button>'}
+  </div></div>`;
+}
+
+// ブライトline操作関数
+function setBLRank(pid,q,evCode,memberCode,val){
+  if(!DB.brightLineData[pid])DB.brightLineData[pid]={};
+  if(!DB.brightLineData[pid][q])DB.brightLineData[pid][q]={ev1:{},ev2:{},confirmed:{},adminConfirmed:false};
+  if(!DB.brightLineData[pid][q].ev1[evCode])DB.brightLineData[pid][q].ev1[evCode]={};
+  DB.brightLineData[pid][q].ev1[evCode][memberCode]=val;
+  renderPage('bright');
+}
+function setConfirmedBL(pid,q,memberCode,val){
+  if(!DB.brightLineData[pid]?.[q])return;
+  DB.brightLineData[pid][q].confirmed[memberCode]=val;
+  renderPage('bright');
+}
+function approveBL(pid,q,evCode){
+  if(!DB.brightLineData[pid]?.[q])return;
+  if(!DB.brightLineData[pid][q]._ev1Approved)DB.brightLineData[pid][q]._ev1Approved={};
+  DB.brightLineData[pid][q]._ev1Approved[evCode]=true;
+  alert('承認しました。管理者へ送付されました。');
+  renderPage('bright');
+}
+function resetBL(pid,q,evCode){
+  if(!DB.brightLineData[pid]?.[q])return;
+  DB.brightLineData[pid][q].ev1[evCode]={};
+  if(DB.brightLineData[pid][q]._ev1Approved)delete DB.brightLineData[pid][q]._ev1Approved[evCode];
+  renderPage('bright');
+}
+function adminConfirmBL(pid,q){
+  if(!DB.brightLineData[pid]?.[q])return;
+  DB.brightLineData[pid][q].adminConfirmed=true;
+  // brightMapにも反映（incentive等から参照できるよう）
+  const h=DB.incentiveHistory[pid]?.[q];
+  if(h)h.brightMap={...DB.brightLineData[pid][q].confirmed};
+  alert('確定ブライトlineを確定しました。メンバーへ反映されます。');
+  renderPage('bright');
+}
+function adminReturnBL(){
+  alert('最終評価者へ差し戻しました。');
+}
+
+// ===== INCENTIVE =====
+function renderKeiriIncentive(){
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const cards=DB.periods.flatMap(p=>['Q4','Q3','Q2','Q1'].map(q=>{
+    const h=DB.incentiveHistory[p.id]?.[q];if(!h||h.payStatus==='future')return'';
+    const done=DB.incentiveAdminConfirmed?.[p.id]?.[q]||false;
+    if(!done)return`<div class="card"><div class="card-hd"><span class="card-title">${p.label} ${q}（支給日：${p.qs[q]?.payDate||'—'}）</span><span class="badge b-warn">確定待ち</span></div>
+      <div class="card-body" style="text-align:center;padding:20px;color:var(--sub)">管理者の最終確定後に閲覧できます</div></div>`;
+    if(h.payStatus==='no_pool')return`<div class="card"><div class="card-hd"><span class="card-title">${p.label} ${q}</span><span class="badge b-red">支給なし</span></div>
+      <div class="card-body"><div class="notice n-danger">粗利がKGIを下回り原資は発生しませんでした。</div></div></div>`;
+    const rows=evalMs.map(m=>{
+      const b=h.brightMap?.[m.code]||'—';
+      const base=typeof h.dist?.[m.code]==='number'?h.dist[m.code]:0;
+      const adj=DB.incentiveAdjust?.[p.id]?.[q]?.[m.code]||0;
+      return`<tr><td>${memberCell(m.code)}</td><td style="text-align:center">${brightChip(b)}</td><td class="num">${DB.brightDist[b]||0}%</td><td class="num num-pos" style="font-weight:700">${(base+adj).toFixed(2)}万円</td><td>${payStatusBadge(h.payStatus)}</td></tr>`;
+    }).join('');
+    return`<div class="card"><div class="card-hd"><span class="card-title">${p.label} ${q}（支給日：${p.qs[q]?.payDate||'—'}）</span>
+      <div class="inline gap-4"><span style="font-size:13px;font-weight:600;color:var(--navy)">合計：${(h.total||0).toFixed(2)}万円</span><span class="badge b-ok">✅ 確定済</span></div></div>
+      <div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th style="text-align:center">ブライトline</th><th style="text-align:right">配分率</th><th style="text-align:right">確定支給額</th><th>支給状況</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+  })).join('');
+  return`<div class="pg-hd"><div class="pg-title">インセンティブ</div><div class="pg-sub">確定済みの支給額（閲覧のみ・最新が上）</div></div>${cards}`;
+}
+function renderIncentive(){
+  const isPrivate=CU.role==='member'||CU.role==='ev1';
+  const isKeiri=CU.role==='keiri';
+  if(isKeiri)return renderKeiriIncentive();
+  if(isPrivate)return renderMyIncentive();
+  const curPool=calcPool(DB.currentPeriod,DB.currentQ);const curH=DB.incentiveHistory[DB.currentPeriod]?.[DB.currentQ]||{pool:0,confirmed:false,payStatus:'future',total:0,dist:{},brightMap:{}};
+  const blQ3=DB.brightLineData?.[DB.currentPeriod]?.[DB.currentQ]||{};
+  const blConfirmed=blQ3.adminConfirmed&&Object.keys(blQ3.confirmed||{}).length>0;
+  // 確定BL（管理者がブライトline画面で確定した内容）のみを支給額計算に使用
+  const curBright=blConfirmed?blQ3.confirmed:{};
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const isIncAdmin=CU.role==='admin';
+  const isIncFinal=CU.role==='final';
+  const incAdminDone=DB.incentiveAdminConfirmed?.[DB.currentPeriod]?.[DB.currentQ]||false;
+  const curRows=evalMs.map(m=>{
+    const b=curBright[m.code]||'—';const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+    const baseAmt=b!=='—'?(curPool*(DB.brightDist[b]||0)/100):0;
+    const adj=DB.incentiveAdjust?.[DB.currentPeriod]?.[DB.currentQ]?.[m.code]||0;
+    const finalAmt=baseAmt+adj;
+    if(isIncFinal){
+      // 最終評価者：リアルタイム閲覧のみ（確定支給額まで表示・操作不可）
+      return`<tr>
+        <td>${memberCell(m.code)}</td>
+        <td style="text-align:center">${brightChip(b)}</td>
+        <td class="num">${DB.brightDist[b]||0}%</td>
+        <td class="num num-pos">${baseAmt>0?baseAmt.toFixed(2)+'万円':'—'}</td>
+        <td style="text-align:right"><span style="font-weight:600;color:var(--sub)">${adj>=0?'+':''}${adj.toFixed(2)}万円</span></td>
+        <td class="num num-pos" style="font-weight:700">${finalAmt.toFixed(2)}万円</td>
+        <td>${payStatusBadge(curH.payStatus)}</td>
+      </tr>`;
+    }
+    if(isIncAdmin)return`<tr>
+      <td>${memberCell(m.code)}</td>
+      <td style="text-align:center">${brightChip(b)}</td>
+      <td class="num">${DB.brightDist[b]||0}%</td>
+      <td class="num num-pos">${baseAmt>0?baseAmt.toFixed(2)+'万円':'—'}</td>
+      <td style="text-align:right">${incAdminDone||!blConfirmed?`<span style="font-weight:600;color:var(--sub)">${adj>=0?'+':''}${adj.toFixed(2)}万円</span>`:
+        `<input type="number" step="0.01" style="width:80px;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${adj}" onchange="setIncAdj('${DB.currentPeriod}','${DB.currentQ}','${m.code}',parseFloat(this.value)||0)">`}
+      </td>
+      <td class="num num-pos" style="font-weight:700">${finalAmt.toFixed(2)}万円</td>
+      <td>${payStatusBadge(curH.payStatus)}</td>
+    </tr>`;
+    return`<tr><td>${memberCell(m.code)}</td><td style="text-align:center">${brightChip(b)}</td><td class="num">${DB.brightDist[b]||0}%</td><td class="num num-pos">${baseAmt>0?baseAmt.toFixed(2)+'万円':'—'}</td><td>${payStatusBadge(curH.payStatus)}</td></tr>`;
+  }).join('');
+  const pastHtml=DB.periods.flatMap(p=>['Q1','Q2','Q3','Q4'].map(q=>{
+    if(p.id===DB.currentPeriod&&q===DB.currentQ)return'';
+    const h=DB.incentiveHistory[p.id]?.[q];if(!h||h.payStatus==='future')return'';
+    const pool2=h.pool;const pq=p.qs[q];
+    const total=h.total||0;
+    const rows2=evalMs.map(m=>{const b=h.brightMap?.[m.code]||'—';const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};const amt=h.dist[m.code];
+      return pool2===0?`<tr><td>${memberCell(m.code)}</td><td colspan="4" style="color:var(--danger)">支給なし</td></tr>`:
+      `<tr><td>${memberCell(m.code)}</td><td style="text-align:center">${brightChip(b)}</td><td class="num">${DB.brightDist[b]||0}%</td><td class="num num-pos">${amt?.toFixed(2)??'—'}万円</td><td>${payStatusBadge(h.payStatus)}</td></tr>`;
+    }).join('');
+    return`<div class="card"><div class="card-hd"><span class="card-title">${p.label} ${q}（支給日：${pq?.payDate||'—'}）</span>
+    <div class="inline gap-4">${total>0?`<span style="font-size:13px;font-weight:600;color:var(--navy)">合計：${total.toFixed(2)}万円</span>`:''}${payStatusBadge(h.payStatus)}</div></div>
+    ${pool2===0?`<div class="card-body"><div class="notice n-danger">粗利がKGIを下回り原資は発生しませんでした。</div></div>`:
+    `<div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th style="text-align:center">ブライトline</th><th style="text-align:right">配分率</th><th style="text-align:right">支給額</th><th>確定状況</th></tr></thead><tbody>${rows2}</tbody></table></div>`}
+    </div>`;
+  })).join('');
+  return`<div class="pg-hd"><div class="pg-title">インセンティブ</div><div class="pg-sub">Q別 粗利連動・ブライトline配分</div></div>
+  <div class="grid3" style="margin-bottom:14px">
+    <div class="stat at-navy"><div class="stat-lbl">${DB.currentQ} 粗利3ヶ月合計</div><div class="stat-val">${fmt(DB.kgiData[DB.currentPeriod]?.[DB.currentQ]?.gross||0)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat at-red"><div class="stat-lbl">${DB.currentQ} KGI</div><div class="stat-val">${fmt(DB.kgiData[DB.currentPeriod]?.[DB.currentQ]?.kgi||0)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat at-ok"><div class="stat-lbl">${DB.currentQ} インセンティブ原資</div><div class="stat-val" style="font-size:20px">${curPool.toFixed(1)}<span class="stat-unit">万円</span></div></div>
+  </div>
+  ${!blConfirmed&&(isIncAdmin||isIncFinal)?`<div class="notice n-warn"><span>⚠️</span><span>ブライトline確定待ち — ${isIncAdmin?'「ブライトline」画面で確定BLを入力し「確定」すると、ここに支給額が自動反映されます。':'管理者がブライトlineを確定すると支給額が表示されます。'}</span></div>`:''}
+  <div class="card"><div class="card-hd"><span class="card-title">最新：${DB.periods.find(p=>p.id===DB.currentPeriod)?.label||''} ${DB.currentQ}${(()=>{const pd=DB.periods.find(p=>p.id===DB.currentPeriod)?.qs?.[DB.currentQ]?.payDate;return pd?`（支給日：${pd}）`:'';})()}</span>
+    <div class="inline gap-4"><span style="font-size:13px;font-weight:600;color:var(--navy)">合計：${curPool.toFixed(2)}万円</span><span class="badge ${incAdminDone?'b-ok':'b-warn'}">${incAdminDone?'✅ 確定済':'確定待ち'}</span></div></div>
+  <div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th style="text-align:center">ブライトline</th><th style="text-align:right">配分率</th><th style="text-align:right">支給額</th>${isIncAdmin||isIncFinal?'<th style="text-align:right">調整額</th><th style="text-align:right">確定支給額</th>':''}<th>確定状況</th></tr></thead><tbody>${curRows}</tbody></table></div>
+  ${isIncFinal?`<div style="padding:10px 18px;border-top:1px solid var(--border)"><span class="badge b-gray">👁 閲覧のみ（リアルタイム）— 確定操作は管理者が行います</span></div>`:''}
+  </div>
+  ${isIncAdmin&&!incAdminDone?`<div style="padding:12px 0;display:flex;gap:8px"><button class="btn btn-navy" onclick="incAdminFinal()" ${blConfirmed?'':'disabled style="opacity:.45;cursor:not-allowed"'}>🔒 最終確定</button>${blConfirmed?'':'<span style="font-size:12px;color:var(--sub);align-self:center">※ブライトline確定後に押せます</span>'}</div>`:''}
+  ${incAdminDone?`<div class="notice n-ok"><span>✅</span><span>確定済み — メンバーへ反映されています</span></div>`:''}
+  <div style="font-size:13px;font-weight:600;color:var(--sub);margin:18px 0 10px;padding-bottom:6px;border-bottom:1px solid var(--border)">過去の履歴</div>
+  ${pastHtml}`;
+}
+function renderMyIncentive(){
+  const code=CU.code;
+  const rows=DB.periods.flatMap(p=>['Q4','Q3','Q2','Q1'].filter(q=>DB.incentiveHistory[p.id]?.[q]).map(q=>{
+    const h=DB.incentiveHistory[p.id][q];
+    // 未来のQは「支給予定」、管理者未確定は「確定待ち」、確定後のみ金額表示
+    if(h.payStatus==='future')return`<tr><td>${payStatusBadge('future')}</td><td style="font-weight:600">${p.label} ${q}<div style="font-size:10px;color:var(--light)">${p.qs[q]?.payDate||''}</div></td><td colspan="4" style="text-align:center;color:var(--light);font-style:italic">支給予定</td></tr>`;
+    const adminDone=DB.incentiveAdminConfirmed?.[p.id]?.[q];
+    if(!adminDone)return`<tr><td>${payStatusBadge('pending')}</td><td style="font-weight:600">${p.label} ${q}<div style="font-size:10px;color:var(--light)">${p.qs[q]?.payDate||''}</div></td><td colspan="4" style="text-align:center;color:var(--light);font-style:italic">確定待ち</td></tr>`;
+    const bright=h.brightMap?.[code];const bi=DB.brightRanks.indexOf(bright);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+    const score=getScores(p.id)[code]?.[q];
+    const baseAmt=typeof h.dist[code]==='number'?h.dist[code]:0;
+    const adj=DB.incentiveAdjust?.[p.id]?.[q]?.[code]||0;
+    const finalAmt=baseAmt+adj;
+    return`<tr>
+      <td>${payStatusBadge(h.payStatus)}</td>
+      <td style="font-weight:600">${p.label} ${q}<div style="font-size:10px;color:var(--light)">${p.qs[q]?.payDate||''}</div></td>
+      <td class="num">${score??'—'}</td>
+      <td style="text-align:center">${h.payStatus==='no_pool'?'<span class="badge b-red">支給なし</span>':bright?brightChip(bright):'<span style="color:var(--light)">—</span>'}</td>
+      <td class="num">${h.payStatus==='no_pool'?'—':(DB.brightDist[bright]||0)+'%'}</td>
+      <td class="num num-pos">${h.payStatus==='no_pool'?'<span style="color:var(--danger)">支給なし</span>':finalAmt.toFixed(2)+'万円'}</td>
+    </tr>`;
+  })).join('');
+  return`<div class="pg-hd"><div class="pg-title">インセンティブ</div><div class="pg-sub">自分の確定支給額（最新が上）</div></div>
+  <div class="card"><div class="card-hd"><span class="card-title">💰 支給履歴</span></div>
+  <div class="tbl-wrap"><table><thead><tr><th>状況</th><th>Q</th><th style="text-align:right">スコア</th><th style="text-align:center">ブライトline</th><th style="text-align:right">配分率</th><th style="text-align:right">確定支給額</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+// ===== BONUS =====
+function renderBonus(){
+  const isAdmin=CU.role==='admin';
+  const isFinal=CU.role==='final';
+  const isKeiri=CU.role==='keiri';
+  const isPrivate=CU.role==='member'||CU.role==='ev1';
+  if(isPrivate||isKeiri)return renderMyBonus();
+
+  const sal=DB.bonusHistory[selPid];
+  const h=sal?.[selHalf];const p=DB.periods.find(x=>x.id===selPid);
+  if(!h)return`<div class="pg-hd"><div class="pg-title">賞与</div></div>${halfSelector('renderPage(CP)')}データなし`;
+  const kgiD=DB.kgiData[selPid]?.[selHalf]||{kgi:0,gross:0};
+  const kgiRate=kgiD.kgi>0?kgiD.gross/kgiD.kgi*100:0;
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const naikanMs=DB.members.filter(m=>m.isNaikan);
+  const adj=DB.bonusAdjust?.[selPid]?.[selHalf]||{baseAdj:{},naikanAdj:{}};
+  const confirmed=h.confirmed||false;
+  const pool=h.upPool||0;
+
+  // 統計
+  let baseSubtotal=0,naikanSubtotal=0,upSubtotal=0;
+  evalMs.forEach(m=>{baseSubtotal+=calcBonusBase(m,selPid,selHalf)+(adj.baseAdj[m.code]||0);});
+  naikanMs.forEach(m=>{naikanSubtotal+=(h.naikanAmts?.[m.name]||0)+(adj.naikanAdj[m.name]||0);});
+  if(h.zone===4){
+    const blData=DB.brightLineData?.[selPid]?.Q3||{};
+    evalMs.forEach(m=>{
+      const bl=h.upBright?.[m.code]||'';
+      upSubtotal+=(bl?(pool*(DB.brightDist[bl]||0)/100):0)*10000;
+    });
+  }
+  const grandTotal=baseSubtotal+naikanSubtotal+upSubtotal;
+
+  // ①基本給部分 行
+  const baseRows=evalMs.map(m=>{
+    const base=calcBonusBase(m,selPid,selHalf);
+    const a=adj.baseAdj[m.code]||0;
+    const final=base+a;
+    return`<tr><td>${selHalf==='H1'?'上期':'下期'}</td><td>${memberCell(m.code)}</td>
+    <td><span class="badge ${m.pos==='リーダー'?'b-navy':'b-gray'}">${m.pos}</span></td>
+    <td class="num">${fmt(base)}円</td>
+    ${isAdmin?`<td style="text-align:right">${confirmed?`<span style="color:var(--sub)">${a>=0?'+':''}${fmt(a)}円</span>`:
+      `<input type="number" style="width:90px;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${a}" onchange="setBonusAdj('${selPid}','${selHalf}','base','${m.code}',parseInt(this.value)||0)">`}
+    </td><td class="num num-pos" style="font-weight:700">${fmt(final)}円</td>`:''}
+    </tr>`;
+  }).join('');
+  const naikanRows=naikanMs.map(m=>{
+    const base=h.naikanAmts?.[m.name]||0;
+    const a=isAdmin?(adj.naikanAdj?.[m.name]||0):0;
+    const final=base+a;
+    return`<tr style="background:#FEF9E7"><td>${selHalf==='H1'?'上期':'下期'}</td>
+    <td><div class="inline"><div class="avatar" style="background:#BA7517">${m.name[0]}</div><span style="font-weight:600">${m.name}</span></div></td>
+    <td><span class="badge b-gold">内勤</span></td>
+    ${isAdmin?`<td class="num">${confirmed?fmt(base)+'円':
+      `<input type="number" style="width:90px;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${base}" onchange="setNaikanBonus('${selPid}','${selHalf}','${m.name}',parseInt(this.value)||0)">`}円</td>
+    <td style="text-align:right">${confirmed?`<span style="color:var(--sub)">${a>=0?'+':''}${fmt(a)}円</span>`:
+      `<input type="number" style="width:90px;font-size:12px;padding:3px 6px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${a}" onchange="setBonusAdj('${selPid}','${selHalf}','naikan','${m.name}',parseInt(this.value)||0)">`}
+    </td><td class="num num-pos" style="font-weight:700">${fmt(final)}円</td>`
+    :`<td class="num">${fmt(base)}円</td>`}
+    </tr>`;
+  }).join('');
+
+  // ②上振れ部分 行
+  const upRows=h.zone===4?evalMs.map(m=>{
+    const bl=h.upBright?.[m.code]||'';
+    const bi=DB.brightRanks.indexOf(bl);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+    const distRate=bl?(DB.brightDist[bl]||0):0;
+    const amt=bl?(pool*distRate/100).toFixed(2):'—';
+    return`<tr><td>${selHalf==='H1'?'上期':'下期'}</td><td>${memberCell(m.code)}</td>
+    <td><span class="badge ${m.pos==='リーダー'?'b-navy':'b-gray'}">${m.pos}</span></td>
+    <td style="text-align:center">${isAdmin&&!confirmed?
+      `<select style="width:62px;font-size:13px;font-weight:700;padding:4px 5px;border:1px solid var(--border);border-radius:var(--rs)" onchange="setBonusBL('${selPid}','${selHalf}','${m.code}',this.value)">
+        <option value="">—</option>${DB.brightRanks.map(r=>`<option value="${r}" ${bl===r?'selected':''}>${r}</option>`).join('')}
+      </select>`:blRankInput(bl,'',true)}</td>
+    <td class="num">${distRate}%</td>
+    <td class="num num-pos">${amt}万円</td>
+    </tr>`;
+  }).join(''):'';
+
+  const thead1=`<thead><tr><th>期間</th><th>氏名</th><th>役職</th><th style="text-align:right">支給額（自動）</th>${isAdmin?'<th style="text-align:right">調整額</th><th style="text-align:right">確定支給額</th>':''}</tr></thead>`;
+  const thead2=`<thead><tr><th>期間</th><th>氏名</th><th>役職</th><th style="text-align:center">ブライトline</th><th style="text-align:right">配分率</th><th style="text-align:right">上振れ分配額</th></tr></thead>`;
+
+  return`<div class="pg-hd"><div class="pg-title">賞与</div></div>
+  ${halfSelector('renderPage(CP)')}
+  <div class="grid4" style="margin-bottom:14px">
+    <div class="stat at-navy"><div class="stat-lbl">半期KGI</div><div class="stat-val" style="font-size:18px">${fmt(kgiD.kgi)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat at-red"><div class="stat-lbl">半期粗利実績</div><div class="stat-val" style="font-size:18px">${fmt(kgiD.gross)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat" style="border-top:3px solid var(--ok)"><div class="stat-lbl">KGI達成率</div><div class="stat-val" style="color:${kgiRate>=100?'var(--ok)':kgiRate>=80?'var(--warn)':'var(--danger)'}">${kgiRate>0?kgiRate.toFixed(1):'—'}<span class="stat-unit">%</span></div></div>
+    <div class="stat at-ok"><div class="stat-lbl">上振れ原資${h.zone===4?'（❹）':''}</div><div class="stat-val" style="font-size:18px">${h.zone===4?pool.toFixed(1):'—'}<span class="stat-unit">${h.zone===4?'万円':''}</span></div></div>
+  </div>
+  <div style="background:var(--bg);border-radius:var(--rs);padding:10px 14px;margin-bottom:12px;font-size:12px;line-height:1.9;color:var(--sub)">
+    <div style="font-weight:600;color:var(--navy)">📐 計算式</div>
+    <div>支給額（自動）＝（基本給＋固定残業手当＋職務手当＋役職手当）× KGI達成率（半期実績 ÷ 半期KGI）</div>
+    <div style="color:var(--light)">※達成率${DB.params.bonusThreshold}%未満は支給なし ／ 100%超の上振れ分は②ブライトline配分（原資${DB.params.bonusUpRate}%）で別途支給</div>
+  </div>
+  <div class="card"><div class="card-hd"><span class="card-title">① 基本給部分</span><span class="badge ${confirmed?'b-ok':'b-warn'}">${confirmed?'✅ 確定済':'確定待ち'}</span></div>
+  <div class="tbl-wrap"><table>${thead1}<tbody>${baseRows}${naikanRows}</tbody>
+  <tfoot><tr style="background:#FAFBFD;font-weight:600"><td colspan="${isAdmin?5:3}" style="text-align:right;font-size:12px;color:var(--sub)">小計</td><td class="num num-pos">${fmt(baseSubtotal+naikanSubtotal)}円</td></tr></tfoot></table></div></div>
+  ${h.zone===4?`<div class="card"><div class="card-hd"><span class="card-title">② 上振れ部分（ブライトline配分）</span><span class="badge b-info">原資 ${pool.toFixed(2)}万円</span></div>
+  <div class="tbl-wrap"><table>${thead2}<tbody>${upRows}</tbody>
+  <tfoot><tr style="background:#FAFBFD;font-weight:600"><td colspan="5" style="text-align:right;font-size:12px;color:var(--sub)">小計</td><td class="num num-pos">${fmt(upSubtotal)}円</td></tr></tfoot></table></div></div>`:''}
+  <div style="background:var(--navy);color:#fff;border-radius:var(--rs);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span style="font-size:14px;font-weight:600">賞与総合計</span>
+    <span style="font-size:20px;font-weight:700">${fmt(grandTotal)}円</span>
+  </div>
+  ${isAdmin&&!confirmed?`<div style="padding:12px 0;display:flex;gap:8px"><button class="btn btn-navy" onclick="bonusAdminFinal('${selPid}','${selHalf}')">🔒 最終確定</button></div>`:''}
+  ${confirmed?`<div class="notice n-ok"><span>✅</span><span>確定済み — 最終評価者・メンバーへ反映されています</span></div>`:''}`;
+}
+function renderBonus_REMOVED(){
+  const isPrivate=CU.role==='member'||CU.role==='ev1';
+  if(isPrivate)return renderMyBonus();
+  const sal=DB.bonusHistory[selPid];const halves=selHalf==='H1'?['H1']:['H2'];
+  const h=sal?.[selHalf];const p=DB.periods.find(x=>x.id===selPid);
+  if(!h)return`<div class="pg-hd"><div class="pg-title">賞与</div></div>${halfSelector('renderPage(CP)')}データなし`;
+  const kgiD=DB.kgiData[selPid]?.[selHalf]||{kgi:0,gross:0};
+  const kgiRate=kgiD.kgi>0?kgiD.gross/kgiD.kgi*100:0;
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const naikanMs=DB.members.filter(m=>m.isNaikan);
+  const baseSubtotal=Object.values(h.baseAmts||{}).reduce((a,v)=>a+v,0);
+  const naikanSubtotal=Object.values(h.naikanAmts||{}).reduce((a,v)=>a+v,0);
+  const upSubtotal=(h.upPool||0)*10000;
+  const grandTotal=baseSubtotal+naikanSubtotal+(h.zone===4?upSubtotal:0);
+  const baseRows=evalMs.map(m=>{return`<tr><td>${selHalf==='H1'?'上期':'下期'}</td><td>${memberCell(m.code)}</td><td><span class="badge ${m.pos==='リーダー'?'b-navy':'b-gray'}">${m.pos}</span></td><td class="num">${fmt(h.baseAmts[m.code]??'—')}円</td></tr>`;}).join('');
+  const naikanRows=naikanMs.map(m=>`<tr style="background:#FEF9E7"><td>${selHalf==='H1'?'上期':'下期'}</td><td><div class="inline"><div class="avatar" style="background:#BA7517">${m.name[0]}</div><span style="font-weight:600">${m.name}</span></div></td><td><span class="badge b-gold">内勤</span></td><td class="num"><input type="number" style="width:100px;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;text-align:right" value="${h.naikanAmts?.[m.name]||0}" ${h.confirmed?'disabled':''}></td></tr>`).join('');
+  const upRows=h.zone===4?evalMs.map(m=>{const b=h.upBright?.[m.code]||'—';const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};return`<tr><td>${selHalf==='H1'?'上期':'下期'}</td><td>${memberCell(m.code)}</td><td><span class="badge ${m.pos==='リーダー'?'b-navy':'b-gray'}">${m.pos}</span></td><td style="text-align:center">${brightChip(b)}</td><td class="num num-pos">${(h.upDist?.[m.code]||0).toFixed(2)}万円</td></tr>`;}).join(''):'';
+  return`<div class="pg-hd"><div class="pg-title">賞与</div></div>
+  ${halfSelector('renderPage(CP)')}
+  <div class="grid4" style="margin-bottom:14px">
+    <div class="stat at-navy"><div class="stat-lbl">半期KGI</div><div class="stat-val" style="font-size:18px">${fmt(kgiD.kgi)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat at-red"><div class="stat-lbl">半期粗利実績</div><div class="stat-val" style="font-size:18px">${fmt(kgiD.gross)}<span class="stat-unit">万円</span></div></div>
+    <div class="stat" style="border-top:3px solid var(--ok)"><div class="stat-lbl">KGI達成率</div><div class="stat-val" style="color:${kgiRate>=100?'var(--ok)':kgiRate>=80?'var(--warn)':'var(--danger)'}">${kgiRate>0?kgiRate.toFixed(1):'—'}<span class="stat-unit">%</span></div></div>
+    <div class="stat at-ok"><div class="stat-lbl">上振れ原資${h.zone===4?'（❹）':''}</div><div class="stat-val" style="font-size:18px">${h.zone===4?(h.upPool||0).toFixed(1):'—'}<span class="stat-unit">${h.zone===4?'万円':''}</span></div></div>
+  </div>
+  <div class="card"><div class="card-hd"><span class="card-title">① 基本給部分（ブライトline不使用）</span><span class="badge ${h.confirmed?'b-ok':'b-warn'}">${h.confirmed?'確定済 🔒':'確定待ち'}</span></div>
+  <div class="tbl-wrap"><table><thead><tr><th>期間</th><th>氏名</th><th>役職</th><th style="text-align:right">支給額</th></tr></thead><tbody>${baseRows}${naikanRows}</tbody>
+  <tfoot><tr style="background:#FAFBFD;font-weight:600"><td colspan="3" style="text-align:right;font-size:12px;color:var(--sub)">基本給部分 小計</td><td class="num num-pos">${fmt(baseSubtotal+naikanSubtotal)}円</td></tr></tfoot></table></div>
+  ${approveBar(h.confirmed,false,false,'bonus')}</div>
+  ${h.zone===4?`<div class="card"><div class="card-hd"><span class="card-title">② 上振れ部分（ブライトline配分）</span><span class="badge b-info">原資 ${(h.upPool||0).toFixed(2)}万円</span></div>
+  <div class="tbl-wrap"><table><thead><tr><th>期間</th><th>氏名</th><th>役職</th><th style="text-align:center">ブライトline</th><th style="text-align:right">上振れ分配額</th></tr></thead><tbody>${upRows}</tbody>
+  <tfoot><tr style="background:#FAFBFD;font-weight:600"><td colspan="4" style="text-align:right;font-size:12px;color:var(--sub)">上振れ部分 小計</td><td class="num num-pos">${fmt(upSubtotal)}円</td></tr></tfoot></table></div></div>`:''}
+  <div style="background:var(--navy);color:#fff;border-radius:var(--rs);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    <span style="font-size:14px;font-weight:600">賞与総合計</span>
+    <span style="font-size:20px;font-weight:700">${fmt(grandTotal)}円</span>
+  </div>`;
+}
+function renderMyBonus(){
+  const isFinal=CU.role==='final';
+  const isKeiri=CU.role==='keiri';
+  const code=CU.code;
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  let html=`<div class="pg-hd"><div class="pg-title">賞与</div><div class="pg-sub">${isFinal?'全員分・閲覧のみ（リアルタイム）':isKeiri?'確定済みの支給額（全員分・閲覧のみ）':'自分の支給履歴（最新が上）'}</div></div>`;
+  DB.periods.forEach(p=>{
+    ['H2','H1'].forEach(half=>{
+      const h=DB.bonusHistory[p.id]?.[half];if(!h)return;
+      const kgiD=DB.kgiData[p.id]?.[half]||{kgi:0,gross:0};
+      const kgiRate=kgiD.kgi>0?(kgiD.gross/kgiD.kgi*100).toFixed(1):'—';
+      const adj=DB.bonusAdjust?.[p.id]?.[half]||{baseAdj:{},naikanAdj:{}};
+      const confirmed=h.confirmed||false;
+      if(!isFinal&&!confirmed)return; // メンバー・1次は確定後のみ
+      const displayMs=(isFinal||isKeiri)?evalMs:[evalMs.find(m=>m.code===code)].filter(Boolean);
+      const naikanMs=DB.members.filter(m=>m.isNaikan);
+      const displayNaikan=(isFinal||isKeiri)?naikanMs:[];
+      let total=0;
+      const rows=displayMs.map(m=>{
+        const base=calcBonusBase(m,p.id,half);const a=adj.baseAdj?.[m.code]||0;const final=base+a;
+        const bl=h.upBright?.[m.code]||'';
+        const upAmt=h.zone===4&&bl?((h.upPool||0)*(DB.brightDist[bl]||0)/100)*10000:0;
+        total+=final+upAmt;
+        return`<tr>
+          <td>①基本給</td><td>${half==='H1'?'上期':'下期'}</td><td>${memberCell(m.code)}</td>
+          <td><span class="badge ${m.pos==='リーダー'?'b-navy':'b-gray'}">${m.pos}</span></td>
+          <td>—</td><td class="num num-pos">${confirmed?fmt(final)+'円':'<span style="color:var(--warn)">確定待ち</span>'}</td>
+        </tr>${h.zone===4&&bl&&confirmed?`<tr>
+          <td>②上振れ</td><td>${half==='H1'?'上期':'下期'}</td><td>${memberCell(m.code)}</td>
+          <td><span class="badge ${m.pos==='リーダー'?'b-navy':'b-gray'}">${m.pos}</span></td>
+          <td style="text-align:center">${brightChip(bl)}</td>
+          <td class="num num-pos">${fmt(upAmt)}円</td>
+        </tr>`:''}`;
+      }).join('');
+      const naikanRows=displayNaikan.map(m=>{
+        const base=h.naikanAmts?.[m.name]||0;
+        return`<tr style="background:#FEF9E7"><td>①基本給</td><td>${half==='H1'?'上期':'下期'}</td>
+        <td><div class="inline"><div class="avatar" style="background:#BA7517">${m.name[0]}</div><span>${m.name}</span></div></td>
+        <td><span class="badge b-gold">内勤</span></td><td>—</td>
+        <td class="num">${confirmed?fmt(base)+'円':'<span style="color:var(--warn)">確定待ち</span>'}</td></tr>`;
+      }).join('');
+      html+=`<div class="card"><div class="card-hd"><span class="card-title">${p.label} ${half==='H1'?'上期':'下期'}（${h.payDate}）</span><span class="badge ${confirmed?'b-ok':'b-warn'}">${confirmed?'✅ 確定済':'確定待ち'}</span></div>
+      <div class="card-body">
+        <div class="grid4" style="margin-bottom:12px">
+          <div class="stat at-navy" style="margin:0"><div class="stat-lbl">半期KGI</div><div class="stat-val" style="font-size:16px">${fmt(kgiD.kgi)}<span class="stat-unit">万</span></div></div>
+          <div class="stat at-red" style="margin:0"><div class="stat-lbl">半期実績</div><div class="stat-val" style="font-size:16px">${fmt(kgiD.gross)}<span class="stat-unit">万</span></div></div>
+          <div class="stat at-ok" style="margin:0"><div class="stat-lbl">KGI達成率</div><div class="stat-val" style="font-size:16px">${kgiRate}<span class="stat-unit">%</span></div></div>
+          <div class="stat" style="margin:0;border-top:3px solid var(--navy)"><div class="stat-lbl">上振れ原資</div><div class="stat-val" style="font-size:16px">${h.zone===4?(h.upPool||0).toFixed(1):'—'}<span class="stat-unit">${h.zone===4?'万':''}</span></div></div>
+        </div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>区分</th><th>期間</th><th>氏名</th><th>役職</th><th style="text-align:center">BL</th><th style="text-align:right">支給額</th></tr></thead>
+      <tbody>${rows}${naikanRows}</tbody></table></div></div>`;
+    });
+  });
+  return html;
+}
+
+// ===== SALARY =====
+function renderSalary(){
+  return renderSalaryV22();
+}
+function renderMySalary(){
+  const code=CU.code;
+  const confirmed=DB.salaryHistory[selPid]?.finalApproved;
+  if(!confirmed){
+    return`<div class="pg-hd"><div class="pg-title">給与改定</div><div class="pg-sub">自分の改定履歴</div></div>
+    <div class="notice n-info"><span>ℹ️</span><span>給与改定は管理者が最終承認するまでは非表示です。確定後に自動表示されます。</span></div>`;
+  }
+  const thead=`<thead><tr>
+    <th>期</th>
+    <th style="text-align:right">年間平均<br>スコア</th>
+    <th style="text-align:center">ランク</th>
+    <th style="text-align:center">昇給<br>ピッチ数</th>
+    <th style="text-align:right">昇給金額</th>
+    <th style="text-align:center">調整<br>ピッチ数</th>
+    <th style="text-align:right">調整金額</th>
+    <th style="text-align:right">前基本給</th>
+    <th style="text-align:right">改定基本給</th>
+    <th style="text-align:right">固定残業<br>手当</th>
+    <th style="text-align:right">前職務<br>手当</th>
+    <th style="text-align:right">改定職務<br>手当</th>
+    <th style="text-align:right">役職手当</th>
+    <th style="text-align:right">総支給額</th>
+  </tr></thead>`;
+  let html=`<div class="pg-hd"><div class="pg-title">給与改定</div><div class="pg-sub">自分の改定履歴（最新が上）</div></div>`;
+  DB.periods.forEach(p=>{
+    const sal=DB.salaryHistory[p.id];if(!sal||!sal.finalApproved)return;
+    const s=sal.items[code];if(!s)return;
+    const m=DB.members.find(x=>x.code===code);if(!m)return;
+    const r=calcSalaryFull(s,m);
+    const rankR=getRank(r.annualAvg);
+    html+=`<div class="card"><div class="card-hd">
+      <span class="card-title">${p.label}</span>
+      <span class="badge b-ok">確定済 🔒</span>
+    </div>
+    <div class="tbl-wrap"><table>${thead}<tbody><tr>
+      <td style="font-weight:600">${p.label}</td>
+      <td class="num">${r.annualAvg}</td>
+      <td style="text-align:center"><span class="rank-chip" style="background:${rankR.bg};color:${rankR.color}">${rankR.rank}</span></td>
+      <td style="text-align:center;font-weight:700;color:${r.pitch>=0?'var(--ok)':'var(--danger)'}">${r.pitch>=0?'+':''}${r.pitch}P</td>
+      <td class="num ${r.pitchAmt>=0?'num-pos':'num-neg'}">${r.pitchAmt>=0?'+':''}${fmt(r.pitchAmt)}円</td>
+      <td style="text-align:center;font-weight:700;color:${r.adjPitch>0?'var(--ok)':r.adjPitch<0?'var(--danger)':'var(--sub)'}">${r.adjPitch>0?'+':''}${r.adjPitch}P</td>
+      <td class="num ${r.adjAmt>0?'num-pos':r.adjAmt<0?'num-neg':''}">${r.adjAmt>0?'+':''}${fmt(r.adjAmt)}円</td>
+      <td class="num">${fmt(r.baseBefore)}円</td>
+      <td class="num" style="font-weight:700;color:var(--navy)">${fmt(r.baseAfter)}円</td>
+      <td class="num" style="color:var(--info)">${fmt(r.fixedOTAfter)}円</td>
+      <td class="num">${fmt(r.jobAllowBefore)}円</td>
+      <td class="num" style="font-weight:600;color:${r.Y>=0?'var(--ok)':'var(--danger)'}">${fmt(r.jobAllowAfter)}円</td>
+      <td class="num">${fmt(r.posAllow)}円</td>
+      <td class="num num-pos" style="font-weight:700">${fmt(r.total)}円</td>
+    </tr></tbody></table></div></div>`;
+  });
+  return html;
+}
+</script>
+<script>// ===== EVAL SHEET =====
+function renderEvalSheet(){
+  const isMemberRole=CU.role==='member';
+  const isEv1Role=CU.role==='ev1';
+  const isPrivate=isMemberRole;
+  // メンバー：自分のみ／1次評価者：自分＋担当メンバー／最終評価者・管理者・経理：全員
+  let evalMs;
+  if(isMemberRole)evalMs=[DB.members.find(m=>m.code===CU.code)];
+  else if(isEv1Role)evalMs=[DB.members.find(m=>m.code===CU.code),...DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外'&&m.ev1===CU.code)];
+  else evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const allowed=evalMs.filter(Boolean).map(m=>m.code);
+  const targetCode=isMemberRole?CU.code:(evalMember&&allowed.includes(evalMember)?evalMember:(isEv1Role?CU.code:(evalMember||allowed[0])));
+  const mOpts=evalMs.filter(Boolean).map(m=>`<option value="${m.code}" ${m.code===targetCode?'selected':''}>${m.name}</option>`).join('');
+  const qOpts=['Q1','Q2','Q3','Q4'].map(q=>`<option value="${q}" ${q===evalQ?'selected':''}>${{Q1:'Q1（5〜7月）',Q2:'Q2（8〜10月）',Q3:'Q3（11〜1月）',Q4:'Q4（2〜4月）'}[q]}</option>`).join('');
+  const pOpts=DB.periods.map(p=>`<option value="${p.id}" ${p.id===evalPid?'selected':''}>${p.label}</option>`).join('');
+  return`<div class="pg-hd"><div class="pg-title">評価シート</div></div>
+  <div class="inline" style="margin-bottom:14px;gap:8px">
+    <select class="fsel" style="width:110px" id="es-p" onchange="evalPid=this.value;renderPage('eval-sheet')">${pOpts}</select>
+    ${!isMemberRole?`<select class="fsel" style="width:150px" id="es-m" onchange="evalMember=this.value;renderPage('eval-sheet')">${mOpts}</select>`:''}
+    <select class="fsel" style="width:160px" id="es-q" onchange="evalQ=this.value;renderPage('eval-sheet')">${qOpts}</select>
+  </div>
+  <div id="eval-detail">${renderEvalDetail(targetCode,evalQ)}</div>`;
+}
+function renderEvalDetail(code,q){
+  const m=DB.members.find(x=>x.code===code);if(!m)return'<div class="notice n-warn">メンバーが見つかりません</div>';
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];
+  if(!sheet)return`<div class="card"><div class="card-body" style="color:var(--sub)">このQのシートはまだ作成されていません。</div></div>`;
+  const confirmed=sheet.status==='confirmed';const locked=sheet.locked&&CU.role!=='admin';
+  const canWeight=CU.role==='admin'||CU.role==='final';
+  const isSelf=CU.code===code;const isAdmin=CU.role==='admin';
+  const qStat=DB.periods.find(x=>x.id===evalPid)?.qs?.[q]?.status;
+  const isGoalApprover=(CU.role==='ev1'&&m.ev1===CU.code)||(CU.role==='final'&&m.evFinal===CU.code&&!m.ev1);
+  const canSelfInput=(isSelf&&sheet.status==='self_eval'&&(qStat==='active'||qStat==='confirmed'))||(isAdmin&&!confirmed);
+  const canEv1Input=(CU.role==='ev1'&&m.ev1===CU.code&&sheet.status==='ev1_wait')||(isAdmin&&!confirmed);
+  const canFinalInput=(CU.role==='final'&&m.evFinal===CU.code&&sheet.status==='final_wait')||(isAdmin&&!confirmed);
+  const ev1Name=m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:'なし';
+  const finalName=m.evFinal?DB.members.find(x=>x.code===m.evFinal)?.name:'—';
+  const {comp,kpi,total}=calcSheetTotal(sheet);
+  const compWsum=sheet.compItems.reduce((a,x)=>a+(x.weight||0),0)||100;
+  const kpiWsum=sheet.kpiItems.reduce((a,x)=>a+(x.weight||0),0)||100;
+  const rank=confirmed&&total>0?getRank(total):null;
+  const pastQs=['Q1','Q2','Q3','Q4'].filter(pq=>pq!==q&&DB.sheets[code]?.[evalPid]?.[pq]?.status==='confirmed');
+  const stepDots=[
+    {l:'目標設定\n完了',done:['goal_locked','self_eval','ev1_wait','ev1','final_wait','final','admin_wait','confirmed'].includes(sheet.status),active:['goal_setting','goal_wait'].includes(sheet.status)},
+    {l:'自己評価\n完了',done:['ev1_wait','ev1','final_wait','final','admin_wait','confirmed'].includes(sheet.status),active:sheet.status==='self_eval'},
+    ...(m.ev1?[{l:'1次評価\n完了',done:['final_wait','final','admin_wait','confirmed'].includes(sheet.status),active:['ev1','ev1_wait'].includes(sheet.status)}]:[]),
+    ...(m.evFinal?[{l:'最終評価\n完了',done:['admin_wait','confirmed'].includes(sheet.status),active:['final','final_wait'].includes(sheet.status)}]:[]),
+    {l:'評価\n確定',done:sheet.status==='confirmed',active:sheet.status==='admin_wait'},
+  ];
+  const steps=stepDots.map((st,i)=>`${i>0?`<div class="step-conn ${st.done?'sc-done':''}"></div>`:''}
+    <div class="step"><div class="step-dot ${st.done?'sd-done':st.active?'sd-active':'sd-pending'}">${st.done?'✓':i+1}</div><div class="step-lbl" style="white-space:pre-line">${st.l}</div></div>`).join('');
+  const canEditGoals=(isAdmin&&!confirmed)||(isSelf&&sheet.status==='goal_setting')||(isGoalApprover&&sheet.status==='goal_wait');
+  const canEdit=canEditGoals;
+  const compRows=sheet.compItems.map((item,i)=>{
+    const itemLocked=item.locked&&!isAdmin;const itemGoalOnly=false;
+    return`<tr class="${itemLocked?'locked-row':''}">
+      <td>
+        <div style="font-size:11px;font-weight:600;color:var(--info)">${item.id}</div>
+        <div style="font-size:13px;font-weight:500">${item.name}</div>
+        <div style="font-size:11px;color:var(--light);margin-top:2px">${item.desc}</div>
+        <div style="margin-top:6px;padding:6px 8px;background:var(--bg);border-radius:4px;border-left:3px solid var(--info)">
+          <div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">目標</div>
+          ${isSelf&&sheet.status==='goal_setting'&&!itemLocked?`<input class="fi" style="font-size:12px;padding:4px 8px" value="${item.goal}" placeholder="目標を入力してください" onchange="setItemGoal('comp','${code}','${q}',${i},this.value)">`:`<div style="font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-word">${item.goal||'—'}</div>`}
+        </div>
+      </td>
+      <td class="num">${item.weight}%</td>
+      <td style="text-align:center">${canSelfInput&&!itemGoalOnly?scoreSelect(item.selfScore,4,`setItemScore('comp','${code}','${q}',${i},'selfScore',this.value)`):scoreChip(item.selfScore,4)}</td>
+      <td style="text-align:center">${m.ev1?(canEv1Input?scoreSelect(item.ev1Score,4,`setItemScore('comp','${code}','${q}',${i},'ev1Score',this.value)`):scoreChip(item.ev1Score,4)):'<span style="color:var(--light)">—</span>'}</td>
+      <td style="text-align:center">${canFinalInput?scoreSelect(item.finalScore,4,`setItemScore('comp','${code}','${q}',${i},'finalScore',this.value)`):scoreChip(item.finalScore,4)}</td>
+      <td class="num">${(((item.finalScore??item.ev1Score??0)*(item.weight||0)/compWsum)*(sheet.compWeight/4)).toFixed(2)}</td>
+      <td>
+        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('comp','${code}','${q}',${i})">修正</button>`:
+        !confirmed&&isSelf?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeCompItem('${code}','${q}',${i})">✕</button>`:''}
+        ${isAdmin&&itemLocked?`<button class="btn btn-warn btn-sm" onclick="unlockItem('comp','${code}','${q}',${i})">🔓解除</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+  const kpiRows=sheet.kpiItems.map((item,i)=>{
+    const itemLocked=item.locked&&!isAdmin;
+    return`<tr class="${itemLocked?'locked-row':''}">
+      <td>
+        <div style="font-size:13px;font-weight:500">${item.name}</div>
+        <div style="margin-top:6px;padding:6px 8px;background:var(--bg);border-radius:4px;border-left:3px solid var(--warn)">
+          <div style="font-size:10px;color:var(--sub);font-weight:600;margin-bottom:2px">目標</div>
+          ${isSelf&&sheet.status==='goal_setting'&&!itemLocked?`<input class="fi" style="font-size:12px;padding:4px 8px" value="${item.goal}" placeholder="目標を入力してください" onchange="setItemGoal('kpi','${code}','${q}',${i},this.value)">`:`<div style="font-size:12px;color:var(--text);white-space:pre-wrap;word-break:break-word">${item.goal||'—'}</div>`}
+        </div>
+      </td>
+      <td class="num">${item.weight}%</td>
+      <td style="text-align:center">${canSelfInput?scoreSelect(item.selfRate,6,`setItemScore('kpi','${code}','${q}',${i},'selfRate',this.value)`):(item.selfRate!=null?scoreChip(item.selfRate,6):'<span style="color:var(--light)">—</span>')}</td>
+      <td style="text-align:center">${m.ev1?(canEv1Input?scoreSelect(item.ev1Score,6,`setItemScore('kpi','${code}','${q}',${i},'ev1Score',this.value)`):(item.ev1Score!=null?scoreChip(item.ev1Score,6):'<span style="color:var(--light)">—</span>')):'<span style="color:var(--light)">—</span>'}</td>
+      <td style="text-align:center">${canFinalInput?scoreSelect(item.finalScore,6,`setItemScore('kpi','${code}','${q}',${i},'finalScore',this.value)`):scoreChip(item.finalScore,6)}</td>
+      <td class="num">${(((item.finalScore??item.ev1Score??0)*(item.weight||0)/kpiWsum)*(sheet.kpiWeight/6)).toFixed(2)}</td>
+      <td>
+        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('kpi','${code}','${q}',${i})">修正</button>`
+        :!confirmed&&isSelf?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKpiItem('${code}','${q}',${i})">✕</button>`:''}
+        ${isAdmin&&itemLocked?`<button class="btn btn-warn btn-sm" onclick="unlockItem('kpi','${code}','${q}',${i})">🔓解除</button>`:''}
+      </td>
+    </tr>`;
+  }).join('');
+  const canGoalSubmit=isSelf&&sheet.status==='goal_setting'&&!locked;
+  const canSelfSubmit=isSelf&&sheet.status==='self_eval'&&(qStat==='active'||qStat==='confirmed');
+  const canGoalApprove=(isGoalApprover||isAdmin)&&sheet.status==='goal_wait';
+  const anyItemLocked=sheet.compItems.some(x=>x.locked)||sheet.kpiItems.some(x=>x.locked);
+  return`<div class="card"><div class="card-hd">
+    <span class="card-title">👤 ${m.name}（${m.pos}） ${q}</span>
+    <div class="inline gap-4">
+      <span class="badge b-gray">1次：${ev1Name}</span><span class="badge b-purple">最終：${finalName}</span>
+      ${statusBadge(sheet.status)}
+      ${locked&&!isAdmin?'<span class="badge b-gray">🔒 ロック済</span>':''}
+      ${isAdmin&&locked?`<button class="btn btn-warn btn-sm" onclick="unlockSheet('${code}','${q}')">🔓 シートロック解除</button>`:''}
+    </div>
+  </div>
+  <div class="card-body" style="padding-bottom:10px"><div class="steps">${steps}</div></div>
+  <div style="padding:0 18px 14px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+    ${/* ① メンバー：目標の承認依頼 */ canGoalSubmit?`<button class="btn btn-navy btn-sm" onclick="submitGoal('${code}','${q}')">📤 目標を保存・承認依頼</button>`:''}
+    ${/* ② 上長：目標の承認（WT調整・修正後にロック） */ canGoalApprove?`
+      <button class="btn btn-ok btn-sm" onclick="lockGoals('${code}','${q}')">✅ 目標設定完了（目標をロック）</button>
+      <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="returnGoal('${code}','${q}')">↩ メンバーへ差し戻し</button>`:''}
+    ${/* 目標ロック済・評価開始待ち */ sheet.status==='goal_locked'?`<span class="badge b-navy">🔒 目標ロック済 — 管理者の評価開始待ち</span>`:''}
+    ${/* ③ メンバー：自己評価の承認依頼 */ canSelfSubmit?`<button class="btn btn-navy btn-sm" onclick="submitSelfEval('${code}','${q}')">📤 自己評価を保存・承認依頼</button>`:''}
+    ${/* 評価開始前 */ isSelf&&sheet.status==='self_eval'&&!(qStat==='active'||qStat==='confirmed')?`<span class="badge b-gray">⏳ 管理者の評価開始待ち — 開始後に自己評価を入力できます</span>`:''}
+    ${/* ④ 1次評価者 */ CU.role==='ev1'&&m.ev1===CU.code&&sheet.status==='ev1_wait'?`
+      <button class="btn btn-ok btn-sm" onclick="submitEv1('${code}','${q}')">✅ 1次評価を確定・最終評価者へ承認依頼</button>
+      <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="returnToSelf('${code}','${q}')">↩ メンバーへ差し戻し</button>`:''}
+    ${/* ⑤ 最終評価者 */ CU.role==='final'&&m.evFinal===CU.code&&sheet.status==='final_wait'?`
+      <button class="btn btn-purple btn-sm" onclick="submitFinal('${code}','${q}')">✅ 最終評価を確定・管理者へ</button>
+      <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="returnToEv1('${code}','${q}')">↩ ${m.ev1?'1次評価者へ差し戻し':'メンバーへ差し戻し'}</button>`:''}
+    ${/* ⑥ 管理者最終確定 — 最終評価者の確定後にのみ表示 */ CU.role==='admin'&&sheet.status==='admin_wait'?`
+      <button class="btn btn-navy btn-sm" onclick="adminFinalConfirm('${code}','${q}')">🔒 最終確定</button>
+      <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="adminReturnToFinal('${code}','${q}')">↩ 最終評価者へ差し戻し</button>`:''}
+    ${/* 管理者：目標ロック解除 */ isAdmin&&!confirmed&&(sheet.status==='goal_locked'||anyItemLocked)?`<button class="btn btn-warn btn-sm" onclick="adminUnlockGoals('${code}','${q}')">🔓 目標ロック解除（管理者のみ）</button>`:''}
+    ${CU.role==='admin'&&sheet.status==='confirmed'?`<span class="badge b-ok">✅ 確定済 — 再開するには管理者ロック解除が必要です</span>`:''}
+  </div></div>
+
+  <div style="display:flex;border-bottom:1px solid var(--border);background:#fff;border-radius:var(--r) var(--r) 0 0;overflow:hidden;border:1px solid var(--border);border-bottom:none">
+    <button class="tab-btn on" data-tabg="eval" onclick="swTab('ec',this,'eval')">現在（${q}）</button>
+    ${pastQs.map(pq=>`<button class="tab-btn" data-tabg="eval" onclick="swTab('ep-${pq}',this,'eval')">${pq} 履歴</button>`).join('')}
+  </div>
+  <div id="ec" data-tabpnl="eval" class="tab-pnl on" style="padding:0">
+    <div class="card" style="border-radius:0;border-top:none;margin-bottom:0">
+      <div class="card-hd"><span class="card-title">📋 コンピテンシー（行動目標）</span>
+        <div class="inline gap-4"><span class="badge b-info">評価ウェイト ${sheet.compWeight}%</span>${canWeight?'<button class="btn btn-out btn-sm">ウェイト変更</button>':''}</div>
+      </div>
+      <div class="tbl-wrap"><table><thead><tr><th>項目・着眼点・目標</th><th style="text-align:right">WT%</th><th style="text-align:center">自己(1〜4)</th><th style="text-align:center">1次(1〜4)</th><th style="text-align:center">最終(1〜4)</th><th style="text-align:right">獲得点</th><th></th></tr></thead>
+      <tbody>${compRows||'<tr><td colspan="7" style="color:var(--light);text-align:center;padding:20px">項目未設定</td></tr>'}</tbody>
+      <tfoot><tr style="background:#FAFBFD;font-weight:600"><td colspan="6" style="text-align:right;font-size:11px;color:var(--sub)">行動スコア合計（${sheet.compWeight}点満点）</td><td class="num">${comp.toFixed(2)}</td></tr></tfoot></table></div>
+      ${(isSelf&&sheet.status==='goal_setting')||(isAdmin&&!confirmed)?`<div style="padding:10px 18px;border-top:1px solid var(--border)"><button class="btn btn-out btn-sm" onclick="openCompPicker('${code}','${q}')">＋ コンピテンシー項目を追加</button></div>`:''}
+    </div>
+    <div class="card" style="border-radius:0;border-top:none;margin-bottom:0">
+      <div class="card-hd"><span class="card-title">📈 数値目標（KPI）</span><div class="inline gap-4" style="flex:1;justify-content:flex-end;flex-wrap:wrap"><span style="font-size:10.5px;color:var(--sub);line-height:1.5;text-align:right">※自己達成率：1点（80％未満）／2点（80％以上90％未満）／3点（90％以上100％未満）／4点（100％以上105％未満）／5点（105％以上110％未満）／6点（110％以上）</span><span class="badge b-info">評価ウェイト ${sheet.kpiWeight}%</span></div></div>
+      <div class="tbl-wrap"><table><thead><tr><th>目標項目・目標</th><th style="text-align:right">WT%</th><th style="text-align:center">自己達成率(1〜6)</th><th style="text-align:center">1次(1〜6)</th><th style="text-align:center">最終(1〜6)</th><th style="text-align:right">獲得点</th><th></th></tr></thead>
+      <tbody>${kpiRows||'<tr><td colspan="7" style="color:var(--light);text-align:center;padding:20px">項目未設定</td></tr>'}</tbody>
+      <tfoot><tr style="background:#FAFBFD;font-weight:600"><td colspan="6" style="text-align:right;font-size:11px;color:var(--sub)">成果スコア合計（${sheet.kpiWeight}点満点）</td><td class="num">${kpi.toFixed(2)}</td></tr></tfoot></table></div>
+      ${(isSelf&&sheet.status==='goal_setting')||(isAdmin&&!confirmed)?`<div style="padding:10px 18px;border-top:1px solid var(--border)"><button class="btn btn-out btn-sm" onclick="openKpiAdd('${code}','${q}')">＋ KPI項目を追加</button></div>`:''}
+    </div>
+    ${confirmed||total>0?`<div class="card" style="border-radius:0 0 var(--r) var(--r);border-top:none;margin-bottom:0"><div class="card-hd"><span class="card-title">🏅 最終スコア・ランク</span></div><div class="card-body"><div class="grid4">
+      <div class="stat at-navy" style="margin:0"><div class="stat-lbl">行動スコア（${sheet.compWeight}点満点）</div><div class="stat-val" style="font-size:20px">${comp.toFixed(2)}<span class="stat-unit">点</span></div></div>
+      <div class="stat at-red" style="margin:0"><div class="stat-lbl">成果スコア（${sheet.kpiWeight}点満点）</div><div class="stat-val" style="font-size:20px">${kpi.toFixed(2)}<span class="stat-unit">点</span></div></div>
+      <div class="stat" style="margin:0;border-top:3px solid ${rank?.color||'var(--border)'}"><div class="stat-lbl">最終評点（100点満点）</div><div class="stat-val" style="font-size:22px;color:${rank?.color||'var(--navy)'}">${total.toFixed(2)}</div></div>
+      <div class="stat" style="margin:0;border-top:3px solid ${rank?.color||'var(--border)'};text-align:center"><div class="stat-lbl">ランク</div>
+        <div style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:4px"><span style="font-size:26px;font-weight:800;color:${rank?.color||'var(--sub)'}">${rank?.rank||'—'}</span>${rank?`<div><div style="font-size:11px;color:var(--sub)">ピッチ変動</div><div style="font-size:13px;font-weight:700;color:${rank.p>=0?'var(--ok)':'var(--danger)'}">${rank.p>=0?'+':''}${rank.p}P</div></div>`:''}</div>
+      </div></div></div></div>`:''}
+  </div>
+  ${pastQs.map(pq=>{const ps=DB.sheets[code]?.[evalPid]?.[pq];const pscore=calcScore(ps);const pr=pscore?getRank(pscore):null;return`<div id="ep-${pq}" data-tabpnl="eval" class="tab-pnl" style="padding:0"><div style="padding:14px 18px;background:var(--bg);border:1px solid var(--border);border-radius:0 0 var(--r) var(--r)"><div class="inline gap-4" style="margin-bottom:8px"><span class="badge b-gray">${pq}</span><span class="badge b-ok">確定済 🔒</span>${pscore?`<span style="font-size:14px;font-weight:700;color:${pr?.color}">${pscore}点 / ${pr?.rank}</span>`:''}</div><div style="font-size:12px;color:var(--sub)">コンピテンシー：${ps?.compItems?.map(x=>`${x.name}（最終:${x.finalScore??'—'}）`).join('、')||'—'}</div><div style="font-size:12px;color:var(--sub);margin-top:3px">KPI：${ps?.kpiItems?.map(x=>`${x.name}（最終:${x.finalScore??'—'}）`).join('、')||'—'}</div></div></div>`;}).join('')}
+  <div id="add-item-area"></div>`;
+}
+
+function openCompPicker(code,q){
+  const modal=document.getElementById('add-item-area');
+  const cats=[...new Set(DB.compLib.map(x=>x.cat))];
+  let html=`<div class="card" style="margin-top:12px"><div class="card-hd"><span class="card-title">コンピテンシー項目を選択（75項目）</span><button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-item-area').innerHTML=''">閉じる</button></div><div class="card-body">`;
+  cats.forEach(cat=>{
+    const items=DB.compLib.filter(x=>x.cat===cat);
+    html+=`<div class="cat-hd" onclick="this.nextElementSibling.classList.toggle('open')"><span style="font-size:12px;font-weight:600;color:var(--navy)">カテゴリ ${cat}</span><span style="font-size:11px;color:var(--sub)">${items.length}項目 ▼</span></div><div class="cat-body">`;
+    items.forEach(item=>{
+      html+=`<span class="comp-lib-chip" onclick="this.classList.toggle('selected')" data-id="${item.id}" data-name="${item.name}" data-desc="${item.desc}">
+        <span class="chip-name">${item.id} ${item.name}</span>
+        <span class="chip-desc">着眼点：${item.desc}</span>
+        <span class="chip-reverse">逆：${item.reverse}</span>
+      </span>`;
+    });
+    html+=`</div>`;
+  });
+  html+=`<div style="margin-top:12px">
+    <div class="fgrid2"><div class="fg"><div class="fl">ウェイト（%）</div><input class="fi" id="new-cw" style="width:80px" type="number" value="20" min="1" max="100"></div></div>
+    <button class="btn btn-navy btn-sm" onclick="confirmAddComp('${code}','${q}')">選択した項目を追加</button>
+  </div></div></div>`;
+  modal.innerHTML=html;
+}
+function confirmAddComp(code,q){
+  const selected=document.querySelectorAll('.comp-lib-chip.selected');
+  const w=parseInt(document.getElementById('new-cw').value)||20;
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  selected.forEach(chip=>{sheet.compItems.push({id:chip.dataset.id,name:chip.dataset.name,desc:chip.dataset.desc,goal:'',weight:w,selfScore:null,ev1Score:null,finalScore:null,selfComment:'',finalComment:'',locked:false});});
+  document.getElementById('add-item-area').innerHTML='';
+  const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
+}
+function removeCompItem(code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;sheet.compItems.splice(i,1);const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
+function removeKpiItem(code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;sheet.kpiItems.splice(i,1);const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
+function unlockItem(type,code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;if(type==='comp')sheet.compItems[i].locked=false;else sheet.kpiItems[i].locked=false;const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
+function unlockSheet(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  if(!confirm('シートのロックを解除しますか？（管理者権限）'))return;
+  sheet.locked=false;
+  if(sheet.status==='confirmed')sheet.status='admin_wait';
+  sheet.compItems.forEach(x=>x.locked=false);sheet.kpiItems.forEach(x=>x.locked=false);
+  alert('ロックを解除しました。修正後、再度「最終確定」でロックされます。');
+  renderPage('eval-sheet');
+}
+function openKpiAdd(code,q){
+  const modal=document.getElementById('add-item-area');
+  modal.innerHTML=`<div class="card" style="margin-top:12px"><div class="card-hd"><span class="card-title">KPI項目を追加</span><button class="btn btn-ghost btn-sm" onclick="document.getElementById('add-item-area').innerHTML=''">閉じる</button></div><div class="card-body">
+    <div class="fgrid3"><div class="fg"><div class="fl">KPI項目名</div><input class="fi" id="nkn" placeholder="例：月次粗利達成額"></div>
+    <div class="fg"><div class="fl">具体的目標</div><input class="fi" id="nkg" placeholder="例：月次粗利175万円以上を毎月達成"></div>
+    <div class="fg"><div class="fl">ウェイト（%）</div><input class="fi" id="nkw" type="number" value="20" style="width:80px"></div></div>
+    <button class="btn btn-navy btn-sm" onclick="confirmAddKpi('${code}','${q}')">KPI項目を追加</button>
+  </div></div>`;
+}
+function confirmAddKpi(code,q){
+  const name=document.getElementById('nkn').value,goal=document.getElementById('nkg').value,w=parseInt(document.getElementById('nkw').value)||20;
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet||!name)return;
+  sheet.kpiItems.push({name,goal,weight:w,selfRate:null,ev1Score:null,finalScore:null,locked:false});
+  document.getElementById('add-item-area').innerHTML='';
+  const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
+}
+
+// ===== TEAM EVAL =====
+function renderTeamEval(){
+  const myTeam=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外'&&(m.ev1===CU.code||m.evFinal===CU.code));
+  if(!myTeam.length)return`<div class="pg-hd"><div class="pg-title">担当メンバー評価シート</div></div><div class="card"><div class="card-body" style="color:var(--sub)">担当メンバーはいません。</div></div>`;
+  const rows=myTeam.map(m=>{const sheet=DB.sheets[m.code]?.[DB.currentPeriod]?.[DB.currentQ];const s=getScores(DB.currentPeriod)[m.code]?.[DB.currentQ];const canInput=(CU.role==='ev1'&&m.ev1===CU.code&&['goal_wait','ev1_wait'].includes(sheet?.status))||(CU.role==='final'&&m.evFinal===CU.code&&['goal_wait','final_wait'].includes(sheet?.status))||CU.role==='admin';
+    return`<tr><td>${memberCell(m.code)}</td><td style="font-size:12px;color:var(--sub)">${m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:'なし'}</td><td style="font-size:12px;color:var(--sub)">${m.evFinal?DB.members.find(x=>x.code===m.evFinal)?.name:'—'}</td><td>${statusBadge(sheet?.status||'goal_setting')}</td><td class="num">${s??'<span style="color:var(--warn)">評価中</span>'}</td>
+    <td>${canInput?`<button class="btn btn-navy btn-sm" onclick="evalMember='${m.code}';evalPid='${DB.currentPeriod}';evalQ='${DB.currentQ}';goto('eval-sheet')">評点入力</button>`:`<button class="btn btn-out btn-sm" onclick="evalMember='${m.code}';evalPid='${DB.currentPeriod}';evalQ='${DB.currentQ}';goto('eval-sheet')">閲覧</button>`}</td></tr>`;
+  }).join('');
+  return`<div class="pg-hd"><div class="pg-title">担当メンバー評価シート</div><div class="pg-sub">Q3（11〜1月）</div></div>
+  <div class="card"><div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th>1次評価者</th><th>最終評価者</th><th>ステータス</th><th style="text-align:right">Q3スコア</th><th>操作</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+// ===== MEMBERS =====
+function renderMembers(){
+  const evalMs=DB.members.filter(m=>!m.isNaikan);const naikanMs=DB.members.filter(m=>m.isNaikan);
+  const allTotal=DB.members.reduce((a,m)=>a+totalBase(m),0);
+  const memberTotal=evalMs.reduce((a,m)=>a+totalBase(m),0);const naikanTotal=naikanMs.reduce((a,m)=>a+totalBase(m),0);
+  const rows=evalMs.map(m=>`<tr>
+    <td>${m.code?`<span class="badge b-gray">${m.code}</span>`:'<span style="color:var(--light)">—</span>'}</td>
+    <td><div class="inline"><div class="avatar">${m.name[0]}</div><div><div style="font-weight:600">${m.name}</div><div style="font-size:11px;color:var(--light)">${m.kana}</div></div></div></td>
+    <td style="font-size:12px">${m.dept}</td><td style="font-size:12px">${m.team||'—'}</td>
+    <td><span class="badge ${m.pos==='リーダー'?'b-navy':m.pos==='部長'?'b-purple':'b-gray'}">${m.pos}</span></td>
+    <td><span class="badge ${m.role==='admin'?'b-red':m.role==='final'?'b-purple':m.role==='ev1'?'b-info':m.role==='keiri'?'b-gold':'b-gray'}">${ROLE_LABELS[m.role]}</span></td>
+    <td style="font-size:12px;color:var(--sub)">${m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:'なし'}</td>
+    <td style="font-size:12px;color:var(--sub)">${m.evFinal?DB.members.find(x=>x.code===m.evFinal)?.name:'—'}</td>
+    <td class="num" style="font-size:12px">${fmt(m.base)}</td>
+    <td><span class="badge ${m.eval==='対象(自動)'?'b-ok':m.eval==='対象(手動)'?'b-info':'b-gray'}">${m.eval}</span></td>
+    <td><span class="badge b-ok">${m.status}</span></td>
+    <td><button class="btn btn-out btn-sm" onclick="openEditMember('${m.code||m.name}',false)">編集</button></td>
+  </tr>`).join('');
+  const naikanRows=naikanMs.map(m=>`<tr style="background:#FEF9E7">
+    <td><span style="color:var(--light)">—</span></td>
+    <td><div class="inline"><div class="avatar" style="background:#BA7517">${m.name[0]}</div><div><div style="font-weight:600">${m.name}</div><div style="font-size:11px;color:var(--light)">${m.kana}</div></div></div></td>
+    <td style="font-size:12px">${m.dept}</td><td style="font-size:12px">${m.team||'—'}</td>
+    <td><span class="badge b-gold">内勤</span></td><td><span class="badge b-gold">内勤</span></td>
+    <td style="color:var(--light)">—</td><td style="color:var(--light)">—</td>
+    <td class="num" style="font-size:12px">${fmt(m.base)}</td>
+    <td><span class="badge b-gray">除外</span></td>
+    <td><span class="badge b-ok">在籍</span></td>
+    <td><button class="btn btn-out btn-sm" onclick="openEditMember('${m.name}',true)">編集</button></td>
+  </tr>`).join('');
+  return`<div class="pg-hd"><div class="pg-title">社員マスタ</div><div class="pg-sub">評価・報酬・権限の起点データ（管理者のみ編集可）</div></div>
+  <div class="notice n-warn"><span>⚠️</span><span>このページの情報は管理者のみ編集可能です。給与関連もこちらで管理します。</span></div>
+  <div style="margin-bottom:12px;display:flex;gap:8px;align-items:center">
+    <input class="fi" placeholder="氏名・コードで検索..." style="width:200px">
+    <button class="btn btn-navy btn-sm" onclick="openEditMember(null,false)">＋ 社員を追加</button>
+  </div>
+  <div class="card"><div class="tbl-wrap"><table><thead><tr><th>コード</th><th>氏名</th><th>所属部</th><th>チーム</th><th>役職</th><th>権限</th><th>1次評価者</th><th>最終評価者</th><th style="text-align:right">基本給</th><th>評価対象</th><th>ステータス</th><th></th></tr></thead>
+  <tbody>${rows}
+  <tr style="background:#FEF3E7"><td colspan="12" style="font-size:11px;font-weight:600;color:#9A7000;padding:6px 10px">▼ 内勤・経理（評価対象外／賞与・給与改定は手入力）</td></tr>
+  ${naikanRows}</tbody>
+  <tfoot>
+    <tr style="background:#FAFBFD"><td colspan="8" style="text-align:right;font-size:12px;color:var(--sub);font-weight:500">メンバー 総支給額合計</td><td class="num" style="font-weight:700">${fmt(memberTotal)}円</td><td colspan="3"></td></tr>
+    <tr style="background:#FAFBFD"><td colspan="8" style="text-align:right;font-size:12px;color:#9A7000;font-weight:500">内勤 総支給額合計</td><td class="num" style="font-weight:700;color:#9A7000">${fmt(naikanTotal)}円</td><td colspan="3"></td></tr>
+    <tr style="background:var(--navy)"><td colspan="8" style="text-align:right;font-size:13px;color:#fff;font-weight:600">全員 総支給額合計</td><td class="num" style="font-size:14px;font-weight:700;color:#fff">${fmt(allTotal)}円</td><td colspan="3"></td></tr>
+  </tfoot></table></div></div>
+  <div id="edit-member-modal"></div>`;
+}
+function openEditMember(key,isNaikan=false){
+  let m;
+  if(key===null){m={code:'',name:'',kana:'',role:'member',dept:DB.depts[0],team:'',pos:'一般',join:'',base:0,posAllow:0,jobAllow:0,fixedOT:0,commute:0,leaveDate:'',status:'在籍',eval:'対象(自動)',ev1:null,evFinal:null,isNaikan:false};}
+  else if(isNaikan){m=DB.members.find(x=>x.isNaikan&&x.name===key);}
+  else{m=DB.members.find(x=>x.code===key)||DB.members.find(x=>x.name===key);}
+  if(!m)return;
+  window._editTarget={key,isNaikan};
+  const allMembers=DB.members.filter(x=>!x.isNaikan);
+  const ev1Opts=allMembers.map(x=>`<option value="${x.code}" ${m.ev1===x.code?'selected':''}>${x.name}（${ROLE_LABELS[x.role]}）</option>`).join('');
+  const finalOpts=allMembers.map(x=>`<option value="${x.code}" ${m.evFinal===x.code?'selected':''}>${x.name}（${ROLE_LABELS[x.role]}）</option>`).join('');
+  const teamOpts=(DB.teams[m.dept]||[]).map(t=>`<option ${m.team===t?'selected':''}>${t}</option>`).join('');
+  const modal=document.getElementById('edit-member-modal');
+  const calcTotal=m.base+m.posAllow+m.jobAllow+m.fixedOT;
+  modal.innerHTML=`<div style="position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px">
+  <div style="background:#fff;border-radius:var(--r);width:700px;max-height:90vh;overflow-y:auto;box-shadow:var(--sh2)">
+    <div style="padding:14px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:#fff;z-index:1">
+      <span style="font-size:15px;font-weight:700;color:var(--navy)">${key===null?'社員を追加':m.name+' を編集'}</span>
+      <button class="btn btn-ghost btn-sm" onclick="document.getElementById('edit-member-modal').innerHTML=''">✕ 閉じる</button>
+    </div>
+    <div style="padding:20px">
+      <div class="sec-div">基本情報</div>
+      <div class="fgrid2">
+        <div class="fg"><div class="fl">社員コード${isNaikan?'（内勤は発行なし）':' <span class="req">*</span>'}</div><input class="fi" value="${m.code||''}" ${isNaikan?'disabled placeholder="—"':(key!==null?'disabled':'placeholder="01"')}></div>
+        <div class="fg"><div class="fl">氏名 <span class="req">*</span></div><input class="fi" id="edit-name" value="${m.name}"></div>
+        <div class="fg"><div class="fl">氏名（カナ）</div><input class="fi" id="edit-kana" value="${m.kana||''}"></div>
+        <div class="fg"><div class="fl">入社年月日</div><input class="fi" id="edit-join" type="date" value="${m.join}"></div>
+        <div class="fg"><div class="fl">ステータス</div><select class="fsel" id="edit-status"><option ${m.status==='在籍'?'selected':''}>在籍</option><option ${m.status==='退職'?'selected':''}>退職</option></select></div>
+        <div class="fg"><div class="fl">退職年月日</div><input class="fi" type="date" value="${m.leaveDate||''}"></div>
+      </div>
+      <div class="sec-div">所属・役職</div>
+      <div class="fgrid3">
+        <div class="fg"><div class="fl">所属部 <span class="req">*</span></div>
+          <select class="fsel" id="edit-dept" onchange="document.getElementById('team-sel').innerHTML=(DB.teams[this.value]||[]).map(t=>'<option>'+t+'</option>').join('')">
+            ${DB.depts.map(d=>`<option ${m.dept===d?'selected':''}>${d}</option>`).join('')}
+          </select></div>
+        <div class="fg"><div class="fl">所属チーム</div><select class="fsel" id="team-sel"><option>—</option>${teamOpts}</select></div>
+        <div class="fg"><div class="fl">役職 <span class="req">*</span></div><select class="fsel" id="edit-posn">${DB.positions.map(p=>`<option ${m.pos===p?'selected':''}>${p}</option>`).join('')}</select></div>
+      </div>
+      <div class="sec-div">権限・評価者設定</div>
+      <div class="fgrid3">
+        <div class="fg"><div class="fl">権限 <span class="req">*</span></div><select class="fsel" id="edit-role">${['admin','final','ev1','member','keiri','naikan'].map(r=>`<option value="${r}" ${m.role===r?'selected':''}>${ROLE_LABELS[r]}</option>`).join('')}</select></div>
+        <div class="fg"><div class="fl">1次評価者</div><select class="fsel" id="edit-ev1"><option value="">なし</option>${ev1Opts}</select></div>
+        <div class="fg"><div class="fl">最終評価者</div><select class="fsel" id="edit-final"><option value="">なし</option>${finalOpts}</select></div>
+      </div>
+      <div class="sec-div">評価設定</div>
+      <div class="fg" style="max-width:200px"><div class="fl">評価対象</div><select class="fsel" id="edit-eval"><option ${m.eval==='対象(自動)'?'selected':''}>対象(自動)</option><option ${m.eval==='対象(手動)'?'selected':''}>対象(手動)</option><option ${m.eval==='除外'?'selected':''}>除外</option></select></div>
+      <div class="sec-div">給与情報（管理者のみ）</div>
+      <div class="fgrid3">
+        <div class="fg"><div class="fl">基本給（円）</div><input class="fi" type="number" id="edit-base" value="${m.base}" oninput="updateCalcTotal()"></div>
+        <div class="fg"><div class="fl">固定残業手当（円）</div><input class="fi" type="number" id="edit-fot" value="${m.fixedOT}" oninput="updateCalcTotal()"></div>
+        <div class="fg"><div class="fl">役職手当（円）</div><input class="fi" type="number" id="edit-pos" value="${m.posAllow}" oninput="updateCalcTotal()"></div>
+        <div class="fg"><div class="fl">職務手当（円）</div><input class="fi" type="number" id="edit-job" value="${m.jobAllow}" oninput="updateCalcTotal()"></div>
+        <div class="fg"><div class="fl">交通費（円）</div><input class="fi" type="number" id="edit-com" value="${m.commute}" oninput="updateCalcTotal()"></div>
+        <div class="fg"><div class="fl">総支給額（自動計算）</div><div id="calc-total" style="padding:9px 11px;background:var(--bg);border-radius:var(--rs);font-size:14px;font-weight:700;color:var(--navy)">${fmt(calcTotal)}円</div></div>
+      </div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:#fff">
+      <button class="btn btn-out" onclick="document.getElementById('edit-member-modal').innerHTML=''">キャンセル</button>
+      <button class="btn btn-navy" onclick="saveMemberEdit()">💾 保存</button>
+    </div>
+  </div></div>`;
+}
+function updateCalcTotal(){
+  const b=parseInt(document.getElementById('edit-base')?.value)||0;
+  const f=parseInt(document.getElementById('edit-fot')?.value)||0;
+  const p=parseInt(document.getElementById('edit-pos')?.value)||0;
+  const j=parseInt(document.getElementById('edit-job')?.value)||0;
+  const c=parseInt(document.getElementById('edit-com')?.value)||0;
+  const el=document.getElementById('calc-total');if(el)el.textContent=fmt(b+f+p+j+c)+'円';
+}
+
+// ===== APPROVAL FLOW =====
+function renderApprovalFlow(){
+  const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
+  const rows=evalMs.map(m=>{const sheet=DB.sheets[m.code]?.[DB.currentPeriod]?.[DB.currentQ];const s=sheet?.status||'goal_setting';
+    return`<tr><td>${memberCell(m.code)}</td><td style="font-size:12px;color:var(--sub)">${m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:'なし'}</td><td style="font-size:12px;color:var(--sub)">${m.evFinal?DB.members.find(x=>x.code===m.evFinal)?.name:'—'}</td>
+    <td>${['goal_locked','self_eval','ev1_wait','ev1','final_wait','final','admin_wait','confirmed'].includes(s)?'<span class="badge b-ok">完了</span>':['goal_setting','goal_wait'].includes(s)?'<span class="badge b-info">対応中</span>':'<span class="badge b-gray">未着手</span>'}</td>
+    <td>${['ev1_wait','ev1','final_wait','final','admin_wait','confirmed'].includes(s)?'<span class="badge b-ok">完了</span>':s==='self_eval'?'<span class="badge b-info">対応中</span>':'<span class="badge b-gray">未着手</span>'}</td>
+    <td>${m.ev1?(['final_wait','final','admin_wait','confirmed'].includes(s)?'<span class="badge b-ok">完了</span>':['ev1','ev1_wait'].includes(s)?'<span class="badge b-info">対応中</span>':'<span class="badge b-gray">未着手</span>'):'<span class="badge b-gray">— なし</span>'}</td>
+    <td>${m.evFinal?(['admin_wait','confirmed'].includes(s)?'<span class="badge b-ok">完了</span>':['final','final_wait'].includes(s)?'<span class="badge b-info">対応中</span>':'<span class="badge b-gray">未着手</span>'):'<span class="badge b-gray">— なし</span>'}</td>
+    <td>${statusBadge(s)}</td></tr>`;
+  }).join('');
+  return`<div class="pg-hd"><div class="pg-title">承認フロー管理</div><div class="pg-sub">${DB.currentQ} 全メンバー評価進捗</div></div>
+  <div class="card"><div class="tbl-wrap"><table><thead><tr><th>メンバー</th><th>1次評価者</th><th>最終評価者</th><th>①目標設定</th><th>②自己評価</th><th>③1次評価</th><th>④最終評価</th><th>現在のステップ</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+
+// ===== PARAMS：評価シート／KGI／実績値 =====
+function qStatusBadge(st){
+  const m={future:'<span class="badge b-gray">未開始</span>',goal:'<span class="badge b-warn">目標設定中</span>',active:'<span class="badge b-info">評価期間中</span>',confirmed:'<span class="badge b-ok">確定済</span>'};
+  return m[st]||'<span class="badge b-gray">—</span>';
+}
+function kgiInputCell(pid,k,field,d){
+  const lockKey=field==='kgi'?'kgiLocked':'grossLocked';
+  const locked=!!d[lockKey];
+  return`<div style="display:inline-flex;align-items:center;gap:6px;justify-content:flex-end">
+    <input type="number" style="width:90px;font-size:12px;padding:4px 6px;border:1px solid var(--border);border-radius:4px;text-align:right;${locked?'background:#F4F5F8;color:var(--sub)':''}" value="${d[field]}" ${locked?'disabled':''} onchange="setKgi('${pid}','${k}','${field}',this.value)">
+    <button class="btn ${locked?'btn-out':'btn-ok'} btn-sm" style="padding:3px 8px;font-size:11px" onclick="toggleKgiLock('${pid}','${k}','${field}')">${locked?'修正':'確定'}</button>
+  </div>`;
+}
+function renderPeriodKgiCard(p){
+  const rows=['Q1','Q2','Q3','Q4','H1','H2'].map(k=>{
+    const d=DB.kgiData[p.id]=DB.kgiData[p.id]||{};d[k]=d[k]||{kgi:0,gross:0};
+    const dd=d[k];
+    const r=dd.kgi>0?(dd.gross/dd.kgi*100).toFixed(1):'—';
+    const isQ=k.startsWith('Q');
+    const qd=isQ?p.qs[k]:null;
+    const label=isQ?(qd?.label||k):(k==='H1'?'H1（上期）':'H2（下期）');
+    const issueCell=!isQ?'<span style="color:var(--light)">—</span>':
+      qd?.status==='future'?`<button class="btn btn-navy btn-sm" style="padding:4px 10px;font-size:11px" onclick="issueSheets('${p.id}','${k}')">シート一括発行</button>`:
+      '<span class="badge b-ok" style="font-size:10px">発行済</span>';
+    const startCell=!isQ?'<span style="color:var(--light)">—</span>':
+      qd?.status==='goal'?`<button class="btn btn-ok btn-sm" style="padding:4px 10px;font-size:11px" onclick="startEval('${p.id}','${k}')">評価開始</button>`:
+      qd?.status==='active'?'<span class="badge b-info" style="font-size:10px">開始済</span>':
+      qd?.status==='confirmed'?'<span class="badge b-ok" style="font-size:10px">確定済</span>':
+      '<span style="color:var(--light)">—</span>';
+    return`<tr>
+      <td style="font-weight:600">${label}</td>
+      <td class="num">${kgiInputCell(p.id,k,'kgi',dd)}</td>
+      <td style="text-align:center">${issueCell}</td>
+      <td class="num">${kgiInputCell(p.id,k,'gross',dd)}</td>
+      <td style="text-align:center">${startCell}</td>
+      <td class="num" style="font-weight:600;color:${parseFloat(r)>=100?'var(--ok)':parseFloat(r)>=80?'var(--warn)':'var(--danger)'}">${r}%</td>
+      <td>${isQ?qStatusBadge(qd?.status):'<span style="color:var(--light)">—</span>'}</td>
+    </tr>`;
+  }).join('');
+  return`<div class="card"><div class="card-hd"><span class="card-title">${p.label}　評価シート／KGI／実績値</span>${p.year?`<span class="badge b-gray">${p.year}</span>`:''}</div>
+  <div class="tbl-wrap"><table><thead><tr><th>期間</th><th style="text-align:right">KGI目標（万円）・修正/確定</th><th style="text-align:center">シート一括発行</th><th style="text-align:right">粗利実績（万円）・修正/確定</th><th style="text-align:center">評価開始</th><th style="text-align:right">達成率</th><th>ステータス</th></tr></thead><tbody>${rows}</tbody></table></div></div>`;
+}
+function setKgi(pid,k,field,val){
+  DB.kgiData[pid]=DB.kgiData[pid]||{};DB.kgiData[pid][k]=DB.kgiData[pid][k]||{kgi:0,gross:0};
+  DB.kgiData[pid][k][field]=parseFloat(val)||0;
+  renderPage('params');
+}
+function toggleKgiLock(pid,k,field){
+  const d=DB.kgiData[pid]?.[k];if(!d)return;
+  const key=field==='kgi'?'kgiLocked':'grossLocked';
+  d[key]=!d[key];
+  renderPage('params');
+}
+function createNewPeriod(){
+  const name=prompt('新しい期の名称を入力してください（例：第13期）');
+  if(!name)return;
+  if(DB.periods.some(p=>p.label===name)){alert('同名の期が既に存在します。');return;}
+  const num=Math.max(...DB.periods.map(p=>parseInt(p.id.slice(1))||0))+1;
+  const id='P'+num;
+  const period={id,label:name,year:'',qs:{
+    Q1:{label:'Q1（5〜7月）',payDate:'',status:'future'},
+    Q2:{label:'Q2（8〜10月）',payDate:'',status:'future'},
+    Q3:{label:'Q3（11〜1月）',payDate:'',status:'future'},
+    Q4:{label:'Q4（2〜4月）',payDate:'',status:'future'},
+  }};
+  DB.periods.unshift(period);
+  DB.kgiData[id]={Q1:{kgi:0,gross:0},Q2:{kgi:0,gross:0},Q3:{kgi:0,gross:0},Q4:{kgi:0,gross:0},H1:{kgi:0,gross:0},H2:{kgi:0,gross:0}};
+  DB.incentiveAdjust[id]={Q1:{},Q2:{},Q3:{},Q4:{}};
+  DB.incentiveAdminConfirmed[id]={Q1:false,Q2:false,Q3:false,Q4:false};
+  DB.bonusAdjust[id]={H1:{baseAdj:{},naikanAdj:{}},H2:{baseAdj:{},naikanAdj:{}}};
+  DB.brightLineData[id]={Q1:{ev1:{},ev2:{},confirmed:{},adminConfirmed:false},Q2:{ev1:{},ev2:{},confirmed:{},adminConfirmed:false},Q3:{ev1:{},ev2:{},confirmed:{},adminConfirmed:false},Q4:{ev1:{},ev2:{},confirmed:{},adminConfirmed:false}};
+  alert(`${name} を作成しました（Q1〜Q4・H1・H2）。\nKGI目標を入力・確定のうえ、「シート一括発行」から目標設定を開始してください。`);
+  renderPage('params');
+}
+function issueSheets(pid,q){
+  if(!confirm(`${q} の評価シートを対象メンバー全員に一括発行しますか？`))return;
+  DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').forEach(m=>{
+    DB.sheets[m.code]=DB.sheets[m.code]||{};
+    DB.sheets[m.code][pid]=DB.sheets[m.code][pid]||{};
+    if(!DB.sheets[m.code][pid][q])DB.sheets[m.code][pid][q]={status:'goal_setting',compWeight:40,kpiWeight:60,locked:false,compItems:[],kpiItems:[]};
+  });
+  const p=DB.periods.find(x=>x.id===pid);
+  if(p&&p.qs[q])p.qs[q].status='goal';
+  alert(`${q} の評価シートを発行しました。メンバーの目標設定 → 上長承認（目標ロック）まで完了後、「評価開始」を押してください。`);
+  renderPage('params');
+}
+function startEval(pid,q){
+  const p=DB.periods.find(x=>x.id===pid);if(!p)return;
+  const notLocked=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').filter(m=>{
+    const st=DB.sheets[m.code]?.[pid]?.[q]?.status;
+    return st&&['goal_setting','goal_wait'].includes(st);
+  });
+  let msg=`${q} の評価を開始しますか？\n（メンバーの評価シートで自己（1〜4）／自己達成率（1〜6）の入力が可能になります）`;
+  if(notLocked.length)msg+=`\n\n⚠️ 目標ロック未完了：${notLocked.map(m=>m.name).join('、')}`;
+  if(!confirm(msg))return;
+  p.qs[q].status='active';
+  DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').forEach(m=>{
+    const sh=DB.sheets[m.code]?.[pid]?.[q];
+    if(sh&&['goal_setting','goal_wait','goal_locked'].includes(sh.status))sh.status='self_eval';
+  });
+  alert(`${q} の評価を開始しました。`);
+  renderPage('params');
+}
+function renderParams(){
+  const floor=DB.params.minWage*DB.params.minWageHours;
+  const rankInputs=DB.brightRanks.map((r,i)=>{const bc=getBrightColor(i);return`<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px"><span style="width:28px;height:28px;border-radius:6px;background:${bc.bg};color:${bc.color};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800">${r}</span><input class="fi" style="width:70px" value="${DB.brightDist[r]||0}"><span style="font-size:12px;color:var(--sub)">%</span></div>`;}).join('');
+  return`<div class="pg-hd"><div class="pg-title">パラメータ設定</div><div class="pg-sub">管理者専用 — 変更は全報酬計算に影響します</div></div>
+  <div class="notice n-warn"><span>⚠️</span><span>変更内容はすべて履歴に記録されます。適用開始Qを必ず指定してください。</span></div>
+  <div class="tabs"><button class="tab-btn on" data-tabg="params" onclick="swTab('pt-reward',this,'params')">報酬パラメータ</button><button class="tab-btn" data-tabg="params" onclick="swTab('pt-kgi',this,'params')">評価シート／KGI／実績値</button><button class="tab-btn" data-tabg="params" onclick="swTab('pt-master',this,'params')">マスタ管理</button></div>
+  <div id="pt-reward" data-tabpnl="params" class="tab-pnl on" style="padding:16px 0">
+    <div class="grid2">
+      <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">💰 インセンティブ・賞与</span></div><div class="card-body">
+        <div class="fg"><div class="fl">インセンティブ原資レート</div><div class="inline"><input class="fi" style="width:70px" value="${DB.params.incentiveRate}"><span class="text-sub">%</span></div></div>
+        <div class="fg"><div class="fl">支給発動条件</div><div class="inline"><input class="fi" style="width:70px" value="${DB.params.incentiveTrigger}"><span class="text-sub">% 以上</span></div></div>
+        <div class="fg"><div class="fl">賞与発動閾値</div><div class="inline"><input class="fi" style="width:70px" value="${DB.params.bonusThreshold}"><span class="text-sub">% 以上</span></div></div>
+        <div class="fg"><div class="fl">賞与上振れレート（❹ゾーン）</div><div class="inline"><input class="fi" style="width:70px" value="${DB.params.bonusUpRate}"><span class="text-sub">%</span></div></div>
+      </div></div>
+      <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">💴 給与・ブライトline</span></div><div class="card-body">
+        <div class="fg"><div class="fl">一般職 ピッチ単価</div><div class="inline"><input class="fi" style="width:80px" value="${DB.params.pitchGeneral}"><span class="text-sub">円/P</span></div></div>
+        <div class="fg"><div class="fl">リーダー職 ピッチ単価</div><div class="inline"><input class="fi" style="width:80px" value="${DB.params.pitchLeader}"><span class="text-sub">円/P</span></div></div>
+        <div class="fg"><div class="fl">最低賃金（岡山県）</div><div class="inline"><input class="fi" style="width:70px" value="${DB.params.minWage}"><span class="text-sub">円/h × ${DB.params.minWageHours}h = ${fmt(floor)}円</span></div></div>
+        <div class="fg"><div class="fl">みなし残業時間</div><div class="inline"><input class="fi" style="width:70px" value="${DB.fixedOTSettings.otHours}"><span class="text-sub">時間</span></div></div>
+        <div class="fg"><div class="fl">平均就労時間</div><div class="inline"><input class="fi" style="width:70px" value="${DB.fixedOTSettings.hours}" onchange="DB.fixedOTSettings.hours=parseInt(this.value)||159;DB.params.avgWorkHours=DB.fixedOTSettings.hours;syncSettings()"><span class="text-sub">h/月</span></div></div>
+        <div class="sec-div">ブライトlineランク設定</div>
+        <div class="fg"><div class="fl">ランク数（現在：${DB.brightRanks.length}）</div><div class="inline"><input class="fi" id="rank-count" style="width:60px" value="${DB.brightRanks.length}"><span class="text-sub">ランク</span><button class="btn btn-out btn-sm" onclick="updateRankCount()">更新</button></div></div>
+        <div class="fl" style="margin-bottom:6px">配分率（合計100%）</div>${rankInputs}
+      </div></div>
+    </div>
+  </div>
+  <div id="pt-kgi" data-tabpnl="params" class="tab-pnl" style="padding:16px 0">
+    <div class="notice n-info"><span>ℹ️</span><span>フロー：「新規期首作成」→ KGI目標を入力・確定 → 「シート一括発行」→ メンバー目標設定・上長承認（目標ロック）→ 粗利実績を入力・確定 → 「評価開始」→ 自己評価の入力が可能になります。</span></div>
+    <div style="margin-bottom:12px"><button class="btn btn-navy btn-sm" onclick="createNewPeriod()">＋ 新規期首作成</button></div>
+    ${DB.periods.map(p=>renderPeriodKgiCard(p)).join('')}
+  </div>
+  <div id="pt-master" data-tabpnl="params" class="tab-pnl" style="padding:16px 0">
+    <div class="grid3">
+      ${[['所属部マスタ',DB.depts],['役職マスタ',DB.positions]].map(([title,items])=>`<div class="card" style="margin:0"><div class="card-hd"><span class="card-title">${title}</span></div><div class="card-body">
+        ${items.map(it=>`<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:13px">${it}</span><button class="btn btn-out btn-sm">編集</button><button class="btn btn-ghost btn-sm" style="color:var(--danger)">削除</button></div>`).join('')}
+        <button class="btn btn-out btn-sm" style="margin-top:8px;width:100%">＋ 追加</button></div></div>`).join('')}
+      <div class="card" style="margin:0"><div class="card-hd"><span class="card-title">所属チームマスタ</span></div><div class="card-body">
+        ${Object.entries(DB.teams).flatMap(([dept,teams])=>teams.map(t=>`<div style="display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--border)"><span style="flex:1;font-size:12px">${t}<div style="font-size:10px;color:var(--light)">${dept}</div></span><button class="btn btn-out btn-sm">編集</button></div>`)).join('')}
+        <button class="btn btn-out btn-sm" style="margin-top:8px;width:100%">＋ 追加</button></div></div>
+    </div>
+  </div>
+  <div style="margin-top:14px;padding:14px 18px;background:var(--white);border-radius:var(--r);border:1px solid var(--border)">
+    <div class="fg" style="max-width:280px;margin-bottom:12px"><div class="fl">変更の適用開始</div><select class="fsel"><option>Q4（2026年2月〜）から適用</option><option>翌期Q1（2026年5月〜）から適用</option></select></div>
+    <div class="inline gap-4"><button class="btn btn-navy btn-sm">💾 変更を保存</button><button class="btn btn-out btn-sm">↩ 現行値に戻す</button></div>
+  </div>`;
+}
+// 給与改定操作
+function updateSalaryPitch(code, val){
+  let s=DB.salaryHistory[selPid]?.items?.[code];
+  if(!s){const m=DB.members.find(x=>x.code===code);if(m)s=DB.salaryHistory[selPid]?.naikanItems?.[m.name];}
+  if(!s)return;
+  s.adjPitch=val;
+  // リアルタイム再描画
+  renderPage('salary');
+}
+function salaryAdminFinal(pid){
+  const sal=DB.salaryHistory[pid];if(!sal)return;
+  sal.finalApproved=true;sal.adjApproved=true;sal.confirmed=true;
+  alert('給与改定を最終確定しました。最終評価者・メンバーへ反映されます。');
+  renderPage('salary');
+}
+
+// 賞与操作
+function setBonusAdj(pid,half,type,key,val){
+  if(!DB.bonusAdjust[pid])DB.bonusAdjust[pid]={};
+  if(!DB.bonusAdjust[pid][half])DB.bonusAdjust[pid][half]={baseAdj:{},naikanAdj:{}};
+  if(type==='base')DB.bonusAdjust[pid][half].baseAdj[key]=val;
+  else DB.bonusAdjust[pid][half].naikanAdj[key]=val;
+  renderPage('bonus');
+}
+function setNaikanBonus(pid,half,name,val){
+  const h=DB.bonusHistory[pid]?.[half];if(!h)return;
+  if(!h.naikanAmts)h.naikanAmts={};
+  h.naikanAmts[name]=val;
+  renderPage('bonus');
+}
+function setBonusBL(pid,half,code,val){
+  const h=DB.bonusHistory[pid]?.[half];if(!h)return;
+  if(!h.upBright)h.upBright={};
+  h.upBright[code]=val;
+  renderPage('bonus');
+}
+function bonusAdminFinal_writeback(pid,half){
+  const h=DB.bonusHistory[pid]?.[half];if(!h)return;
+  DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').forEach(m=>{h.baseAmts[m.code]=calcBonusBase(m,pid,half);});
+}
+function bonusAdminFinal(pid,half){
+  bonusAdminFinal_writeback(pid,half);
+  const h=DB.bonusHistory[pid]?.[half];if(!h)return;
+  h.confirmed=true;
+  alert('賞与を最終確定しました。メンバーへ反映されます。');
+  renderPage('bonus');
+}
+
+// インセンティブ操作
+function setIncAdj(pid,q,code,val){
+  if(!DB.incentiveAdjust[pid])DB.incentiveAdjust[pid]={};
+  if(!DB.incentiveAdjust[pid][q])DB.incentiveAdjust[pid][q]={};
+  DB.incentiveAdjust[pid][q][code]=val;
+  renderPage('incentive');
+}
+function incFinalApprove_REMOVED(){
+  DB.incentiveHistory.P12.Q3._finalApproved=true;
+  alert('支給確定しました。管理者へ送付されました。');
+  renderPage('incentive');
+}
+function incAdminFinal(){
+  const bl=DB.brightLineData?.[DB.currentPeriod]?.[DB.currentQ];
+  if(!bl?.adminConfirmed||!Object.keys(bl.confirmed||{}).length){alert('先に「ブライトline」画面で確定BLを入力・確定してください。');return;}
+  if(!confirm('インセンティブを最終確定しますか？\n確定後、メンバー全員のインセンティブ・ブライトline画面へ反映されます。'))return;
+  const pool=calcPool(DB.currentPeriod,DB.currentQ);
+  const h=DB.incentiveHistory[DB.currentPeriod][DB.currentQ];
+  // 確定BL・支給額（調整込み）を履歴へ書き戻し
+  h.brightMap={...bl.confirmed};
+  h.dist={};let total=0;
+  DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外').forEach(m=>{
+    const b=bl.confirmed[m.code];
+    const base=b?pool*(DB.brightDist[b]||0)/100:0;
+    const adj=DB.incentiveAdjust?.[DB.currentPeriod]?.[DB.currentQ]?.[m.code]||0;
+    h.dist[m.code]=Math.round(base*100)/100; // 基本配分のみ保存（調整額はincentiveAdjustで別管理・表示時に加算）
+    total+=Math.round((base+adj)*100)/100;
+  });
+  h.total=Math.round(total*100)/100;
+  h.payStatus='paid';h.confirmed=true;
+  DB.incentiveAdminConfirmed[DB.currentPeriod][DB.currentQ]=true;
+  alert('最終確定しました。メンバー全員のインセンティブ・ブライトline画面へ反映されます。');
+  renderPage('incentive');
+}
+
+function updateRankCount(){
+  const n=parseInt(document.getElementById('rank-count').value)||4;
+  const alpha='ABCDEFGH'.slice(0,Math.min(8,Math.max(2,n)));
+  DB.brightRanks=[...alpha];
+  const nd={};DB.brightRanks.forEach(r=>{nd[r]=DB.brightDist[r]||Math.floor(100/DB.brightRanks.length);});
+  DB.brightDist=nd;renderPage('params');
+}
+</script>
+<script>// ===== MAIN.JS =====
+function login(){
+  const id=document.getElementById('login-id').value.trim();
+  const m=DB.members.find(x=>x.code===id&&!x.isNaikan);
+  if(!m){alert('社員コードが見つかりません\n（内勤の方はログインできません）');return;}
+  CU=m;evalMember=null;selPid='P12';selQ='Q3';selHalf='H1';
+  document.getElementById('login-page').style.display='none';
+  document.getElementById('app').style.display='flex';
+  document.getElementById('sb-avatar').textContent=m.name[0];
+  document.getElementById('sb-name').textContent=m.name;
+  document.getElementById('sb-role').textContent=ROLE_LABELS[m.role]||m.role;
+  buildSidebar();goto(m.role==='keiri'?'incentive':'dashboard');
+}
+function logout(){document.getElementById('app').style.display='none';document.getElementById('login-page').style.display='flex';CU=null;}
+
+function buildSidebar(){
+  const r=CU.role;
+  const isAdmin=r==='admin',isFinal=r==='final',isKeiri=r==='keiri',isEv1=r==='ev1',isMember=r==='member';
+  let html='';
+  if(isKeiri){
+    // 経理：最新の確定報酬の閲覧のみ
+    html+=`<div class="sb-sec">報酬（確定分の閲覧）</div><div class="sb-nav">`;
+    html+=nb('nav-in','💰','インセンティブ','incentive');
+    html+=nb('nav-bo','🎁','賞与','bonus');
+    html+=nb('nav-sa','💴','給与改定','salary');
+    html+=`</div>`;
+    document.getElementById('sb-content').innerHTML=html;
+    return;
+  }
+  html+=`<div class="sb-sec">メイン</div><div class="sb-nav">`;
+  html+=nb('nav-db','📊','ダッシュボード','dashboard');
+  html+=nb('nav-ev','📝',(isAdmin||isFinal)?'評価シート（全員）':'評価シート（自分）','eval-sheet');
+  html+=nb('nav-br','🏆','ブライトline','bright');
+  html+=`</div>`;
+  if(isAdmin||isFinal||isEv1){
+    html+=`<div class="sb-sec">担当メンバー評価</div><div class="sb-nav">`;
+    html+=nb('nav-te','👥','担当メンバー評価シート','team-eval');
+    html+=`</div>`;
+  }
+  html+=`<div class="sb-sec">報酬</div><div class="sb-nav">`;
+  html+=nb('nav-in','💰','インセンティブ','incentive');
+  html+=nb('nav-bo','🎁','賞与','bonus');
+  html+=nb('nav-sa','💴','給与改定','salary');
+  html+=`</div>`;
+  if(isAdmin){
+    html+=`<div class="sb-sec">管理</div><div class="sb-nav">`;
+    html+=nb('nav-mb','👤','社員マスタ','members');
+    html+=nb('nav-af','✅','承認フロー','approval-flow');
+    html+=nb('nav-pa','⚙️','パラメータ設定','params');
+    html+=`</div>`;
+  }
+  document.getElementById('sb-content').innerHTML=html;
+}
+function nb(id,icon,label,page){return`<button id="${id}" class="nav-item" onclick="goto('${page}')"><span class="nav-icon">${icon}</span>${label}</button>`;}
+
+function goto(page){
+  CP=page;
+  const titles={dashboard:'ダッシュボード','eval-sheet':'評価シート',bright:'ブライトline',incentive:'インセンティブ',bonus:'賞与',salary:'給与改定',members:'社員マスタ','approval-flow':'承認フロー',params:'パラメータ設定','team-eval':'担当メンバー評価シート'};
+  document.getElementById('tb-title').textContent=titles[page]||page;
+  renderPage(page);
+  document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+  const map={dashboard:'nav-db','eval-sheet':'nav-ev',bright:'nav-br',incentive:'nav-in',bonus:'nav-bo',salary:'nav-sa',members:'nav-mb','approval-flow':'nav-af',params:'nav-pa','team-eval':'nav-te'};
+  const el=document.getElementById(map[page]);if(el)el.classList.add('active');
+}
+function renderPage(page){
+  const el=document.getElementById('content');
+  switch(page){
+    case 'dashboard':el.innerHTML=renderDashboard();break;
+    case 'eval-sheet':el.innerHTML=renderEvalSheet();break;
+    case 'bright':el.innerHTML=renderBright();break;
+    case 'incentive':el.innerHTML=renderIncentive();break;
+    case 'bonus':el.innerHTML=renderBonus();break;
+    case 'salary':el.innerHTML=renderSalary();break;
+    case 'members':el.innerHTML=renderMembers();break;
+    case 'approval-flow':el.innerHTML=renderApprovalFlow();break;
+    case 'params':el.innerHTML=renderParams();break;
+    case 'team-eval':el.innerHTML=renderTeamEval();break;
+    default:el.innerHTML='<div class="notice n-info"><span>ℹ️</span><span>準備中</span></div>';
+  }
+}
+function swTab(id,btn,group){
+  // ボタンのONを切り替え
+  document.querySelectorAll(`[data-tabg="${group}"]`).forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  // 同グループのパネルを全て非表示にしてから対象だけ表示
+  document.querySelectorAll(`[data-tabpnl="${group}"]`).forEach(p=>p.classList.remove('on'));
+  const el=document.getElementById(id);if(el)el.classList.add('on');
+}
+// ===== 評価シート 承認フロー操作 =====
+function scoreSelect(val,max,onchange){
+  const opts=Array.from({length:max},(_,i)=>i+1).map(v=>`<option value="${v}" ${val===v?'selected':''}>${v}</option>`).join('');
+  return `<select style="width:58px;font-size:13px;font-weight:700;padding:4px 6px;border:1px solid var(--border);border-radius:var(--rs);text-align:center;background:#FDFDF4" onchange="${onchange}"><option value="">—</option>${opts}</select>`;
+}
+function setItemScore(type,code,q,i,field,val){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
+  item[field]=val===''?null:parseInt(val);
+  const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
+}
+function setItemGoal(type,code,q,i,val){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
+  item.goal=val;
+}
+function submitGoal(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const m=DB.members.find(x=>x.code===code);
+  sheet.status='goal_wait';
+  const approver=m.ev1?DB.members.find(x=>x.code===m.ev1)?.name:DB.members.find(x=>x.code===m.evFinal)?.name;
+  alert(`目標を保存し、上長（${approver||'上長'}）へ承認依頼しました。`);
+  renderPage('eval-sheet');
+}
+function returnGoal(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.status='goal_setting';
+  alert('メンバーへ差し戻しました。');
+  renderPage('eval-sheet');
+}
+function lockGoals(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.compItems.forEach(x=>x.locked=true);sheet.kpiItems.forEach(x=>x.locked=true);
+  const qStat=DB.periods.find(x=>x.id===evalPid)?.qs?.[q]?.status;
+  sheet.status=(qStat==='active')?'self_eval':'goal_locked';
+  alert('目標設定を完了し、目標をロックしました。'+(qStat==='active'?'自己評価の入力が可能です。':'管理者が「評価開始」すると自己評価の入力が可能になります。')+'\n※ロック後の解除・修正・再ロックは管理者のみ可能です。');
+  renderPage('eval-sheet');
+}
+function adminUnlockGoals(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  if(!confirm('目標ロックを解除しますか？（管理者のみ）\n解除後は目標・WTを修正のうえ「目標設定完了（目標をロック）」で再ロックしてください。'))return;
+  sheet.compItems.forEach(x=>x.locked=false);sheet.kpiItems.forEach(x=>x.locked=false);
+  if(['goal_locked','self_eval'].includes(sheet.status))sheet.status='goal_wait';
+  renderPage('eval-sheet');
+}
+function submitSelfEval(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const m=DB.members.find(x=>x.code===code);
+  sheet.status=m.ev1?'ev1_wait':'final_wait';
+  alert('自己評価を提出しました。');
+  renderPage('eval-sheet');
+}
+function submitEv1(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.status='final_wait';
+  alert('1次評価を確定しました。最終評価者へ送付されます。');
+  renderPage('eval-sheet');
+}
+function returnToSelf(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.status='self_eval';
+  alert('メンバーへ差し戻しました。');
+  renderPage('eval-sheet');
+}
+function submitFinal(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.status='admin_wait';
+  alert('最終評価を確定しました。管理者へ送付されます。');
+  renderPage('eval-sheet');
+}
+function returnToEv1(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const m=DB.members.find(x=>x.code===code);
+  sheet.status=m.ev1?'ev1_wait':'self_eval';
+  sheet._finalDone=false;
+  alert(m.ev1?'1次評価者へ差し戻しました。':'メンバーへ差し戻しました。');
+  renderPage('eval-sheet');
+}
+function adminFinalConfirm(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.status='confirmed';sheet.locked=true;
+  alert('評価を最終確定しました。');
+  renderPage('eval-sheet');
+}
+function adminReturnToFinal(code,q){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  sheet.status='final_wait';
+  alert('最終評価者へ差し戻しました。');
+  renderPage('eval-sheet');
+}
+
+function openItemEdit(type,code,q,i){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
+  const old=document.getElementById('edit-modal');if(old)old.remove();
+  const modal=document.createElement('div');
+  modal.id='edit-modal';
+  modal.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:300;display:flex;align-items:center;justify-content:center';
+  modal.innerHTML=`<div style="background:#fff;border-radius:10px;padding:24px;width:480px;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+    <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:16px">項目を修正：${item.name||item.id}</div>
+    ${type==='comp'?`
+      <div class="fg"><div class="fl">目標</div><textarea class="fta" id="edit-goal">${item.goal}</textarea></div>
+      <div class="fg"><div class="fl">ウェイト（%）</div><input class="fi" id="edit-wt" type="number" value="${item.weight}" style="width:80px"></div>
+    `:`
+      <div class="fg"><div class="fl">KPI項目名</div><input class="fi" id="edit-goal" value="${item.name}"></div>
+      <div class="fg"><div class="fl">目標</div><textarea class="fta" id="edit-goal2">${item.goal}</textarea></div>
+      <div class="fg"><div class="fl">ウェイト（%）</div><input class="fi" id="edit-wt" type="number" value="${item.weight}" style="width:80px"></div>
+    `}
+    <div style="font-size:11px;color:var(--sub);margin-top:6px">※評点はシート上のプルダウンから直接入力してください。</div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:16px">
+      <button class="btn btn-out" onclick="document.getElementById('edit-modal').remove()">キャンセル（戻る）</button>
+      <button class="btn btn-navy" onclick="saveItemEdit('${type}','${code}','${q}',${i})">✅ 確定・保存</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+}
+function saveItemEdit(type,code,q,i){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
+  if(type==='comp'){
+    item.goal=document.getElementById('edit-goal').value;
+    item.weight=parseInt(document.getElementById('edit-wt').value)||item.weight;
+  } else {
+    item.name=document.getElementById('edit-goal').value||item.name;
+    item.goal=document.getElementById('edit-goal2').value;
+    item.weight=parseInt(document.getElementById('edit-wt').value)||item.weight;
+  }
+  const md=document.getElementById('edit-modal');if(md)md.remove();
+  const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
+}
+</script>
+<script>
+// ============================================================
+// ===== SUPABASE 接続アダプタ（STEP4 本番接続）v3.0 =====
+// v2.7の見た目・計算ロジックはそのまま、データの読み書きだけを
+// Supabase（本番データベース）に接続する層。
+// ============================================================
+const SB_URL = 'https://uoiedgjbwmpwtthnumot.supabase.co';
+const SB_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVvaWVkZ2pid21wd3R0aG51bW90Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMyNTU1MTYsImV4cCI6MjA5ODgzMTUxNn0.P6bh7qcSgDG3gQvorvMfQNSjNYG7N_b4CuK_e_vRmgk';
+const sb = window.supabase.createClient(SB_URL, SB_ANON_KEY);
+
+// 社員コード⇔内部ID⇔氏名の対応表（読込時に作成）
+const _EMP = { idByCode: {}, idByName: {}, byId: {}, byCode: {} };
+
+// ---------- 共通：エラー通知 ----------
+function sbFail(label, error) {
+  console.error('[Supabase保存エラー]', label, error);
+  alert('保存に失敗しました（' + label + '）。\n通信状態をご確認ください。\n画面を再読み込みすると、保存済みの最新データに戻ります。');
+}
+async function sbRun(label, promise) {
+  try {
+    const { error } = await promise;
+    if (error) { sbFail(label, error); return false; }
+    return true;
+  } catch (e) { sbFail(label, e); return false; }
+}
+
+// ---------- 社員マスタ編集の保存（v3.4で本実装） ----------
+async function saveMemberEdit() {
+  const t = window._editTarget || {};
+  if (t.key === null || t.key === undefined) {
+    alert('新しい社員の追加は、ログインアカウントの発行が必要なため、この画面からは行えません。\n（追加が必要になったら、引継ぎメモの手順に沿ってSQLで対応します）');
+    return;
+  }
+  let m;
+  if (t.isNaikan) m = DB.members.find(x => x.isNaikan && x.name === t.key);
+  else m = DB.members.find(x => x.code === t.key) || DB.members.find(x => x.name === t.key);
+  if (!m || !m._id) { alert('対象の社員が見つかりません。画面を再読み込みしてやり直してください。'); return; }
+  const val = id => { const e = document.getElementById(id); return e ? e.value : ''; };
+  const numv = id => parseInt(val(id)) || 0;
+  const name = (val('edit-name') || '').trim();
+  if (!name) { alert('氏名を入力してください。'); return; }
+  let team = val('team-sel'); if (team === '—') team = '';
+  const payload = {
+    name, kana: (val('edit-kana') || '').trim(),
+    join_date: val('edit-join') || null,
+    status: val('edit-status') || '在籍',
+    dept: val('edit-dept') || '', team,
+    pos: val('edit-posn') || '', role: val('edit-role') || m.role,
+    ev1_code: val('edit-ev1') || null,
+    ev_final_code: val('edit-final') || null,
+    eval_type: val('edit-eval') || m.eval,
+  };
+  const sal = {
+    emp_id: m._id,
+    base: numv('edit-base'), pos_allow: numv('edit-pos'), job_allow: numv('edit-job'),
+    fixed_ot: numv('edit-fot'), commute: numv('edit-com'),
+  };
+  const ok1 = await sbRun('社員マスタ保存', sb.from('employees').update(payload).eq('id', m._id));
+  if (!ok1) return;
+  const ok2 = await sbRun('給与情報保存', sb.from('employee_salaries').upsert(sal, { onConflict: 'emp_id' }));
+  if (!ok2) return;
+  // 最新データを読込直して画面を更新
+  await loadAllFromSupabase();
+  if (CU) {
+    const me = DB.members.find(x => x._authId && x._authId === CU._authId)
+      || DB.members.find(x => x.code && x.code === CU.code)
+      || DB.members.find(x => x.name === CU.name);
+    if (me) CU = me;
+  }
+  const md = document.getElementById('edit-member-modal'); if (md) md.innerHTML = '';
+  renderPage('members');
+  alert('保存しました。');
+}
+
+// ============================================================
+// 読込：Supabase → 既存DBオブジェクト形式へ変換
+// ============================================================
+async function loadAllFromSupabase() {
+  const g = (t) => sb.from(t).select('*');
+  const results = await Promise.all([
+    g('employees'), g('employee_salaries'), g('departments'), g('teams'), g('positions'),
+    g('competency_library'), g('app_settings'), g('periods'), g('period_terms'),
+    g('evaluation_sheets'), g('sheet_comp_items'), g('sheet_kpi_items'),
+    g('brightline_inputs'), g('brightline_confirmed'), g('brightline_status'), g('brightline_approvals'),
+    g('incentives'), g('incentive_details'), g('bonuses'), g('bonus_details'),
+    g('salary_revisions'), g('salary_revision_items'),
+  ]);
+  const R = (r) => (r && !r.error && Array.isArray(r.data)) ? r.data : [];
+  const T = {
+    employees: R(results[0]), salaries: R(results[1]), departments: R(results[2]),
+    teams: R(results[3]), positions: R(results[4]), complib: R(results[5]),
+    settings: R(results[6]), periods: R(results[7]), terms: R(results[8]),
+    sheets: R(results[9]), compItems: R(results[10]), kpiItems: R(results[11]),
+    blInputs: R(results[12]), blConfirmed: R(results[13]), blStatus: R(results[14]), blApprovals: R(results[15]),
+    incentives: R(results[16]), incentiveDetails: R(results[17]),
+    bonuses: R(results[18]), bonusDetails: R(results[19]),
+    salaryRevs: R(results[20]), salaryRevItems: R(results[21]),
+  };
+  buildDBFromRows(T);
+}
+
+function buildDBFromRows(T) {
+  const num = (v, d = 0) => (v === null || v === undefined || v === '') ? d : Number(v);
+
+  // ---- 社員 ----
+  const salById = {};
+  T.salaries.forEach(s => { salById[s.emp_id] = s; });
+  _EMP.idByCode = {}; _EMP.idByName = {}; _EMP.byId = {}; _EMP.byCode = {};
+  DB.members = T.employees
+    .slice()
+    .sort((a, b) => String(a.emp_code || '99').localeCompare(String(b.emp_code || '99'), 'ja', { numeric: true }))
+    .map(e => {
+      const s = salById[e.id] || {};
+      const m = {
+        code: e.emp_code, name: e.name, kana: e.kana || '', role: e.role,
+        dept: e.dept || '', team: e.team || '', pos: e.pos || '', join: e.join_date || '',
+        base: num(s.base), posAllow: num(s.pos_allow), jobAllow: num(s.job_allow),
+        fixedOT: num(s.fixed_ot), commute: num(s.commute),
+        status: e.status, eval: e.eval_type, ev1: e.ev1_code, evFinal: e.ev_final_code,
+        isNaikan: !!e.is_naikan, _id: e.id, _authId: e.auth_user_id,
+      };
+      _EMP.byId[e.id] = m;
+      if (e.emp_code) { _EMP.idByCode[e.emp_code] = e.id; _EMP.byCode[e.emp_code] = m; }
+      _EMP.idByName[e.name] = e.id;
+      return m;
+    });
+
+  // ---- マスタ ----
+  DB.depts = T.departments.slice().sort((a, b) => a.sort_no - b.sort_no).map(d => d.name);
+  DB.teams = {};
+  T.teams.slice().sort((a, b) => a.sort_no - b.sort_no).forEach(t => {
+    (DB.teams[t.dept_name] = DB.teams[t.dept_name] || []).push(t.name);
+  });
+  DB.positions = T.positions.slice().sort((a, b) => a.sort_no - b.sort_no).map(p => p.name);
+  DB.compLib = T.complib.slice().sort((a, b) => {
+    const [ca, na] = String(a.id).split('-'), [cb, nb] = String(b.id).split('-');
+    return ca === cb ? (parseInt(na) - parseInt(nb)) : ca.localeCompare(cb);
+  }).map(c => ({ id: c.id, cat: c.cat, name: c.name, desc: c.descr || '', reverse: c.reverse || '' }));
+
+  // ---- パラメータ ----
+  if (T.settings.length) {
+    const st = T.settings[0];
+    if (st.fixed_ot) DB.fixedOTSettings = st.fixed_ot;
+    if (st.params) DB.params = st.params;
+    if (st.bright_ranks) DB.brightRanks = st.bright_ranks;
+    if (st.bright_dist) DB.brightDist = st.bright_dist;
+  }
+
+  // ---- 期・四半期・KGI ----
+  const termMap = {};
+  T.terms.forEach(t => { (termMap[t.period_id] = termMap[t.period_id] || {})[t.term] = t; });
+  DB.periods = T.periods.slice()
+    .sort((a, b) => (parseInt(String(b.id).slice(1)) || 0) - (parseInt(String(a.id).slice(1)) || 0))
+    .map(p => {
+      const qs = {};
+      ['Q1', 'Q2', 'Q3', 'Q4'].forEach(q => {
+        const t = termMap[p.id]?.[q];
+        qs[q] = t ? { label: t.label || q, payDate: t.pay_date || '', status: t.status } : { label: q, payDate: '', status: 'future' };
+      });
+      return { id: p.id, label: p.label, year: p.year_label || '', qs };
+    });
+  DB.kgiData = {};
+  T.terms.forEach(t => {
+    DB.kgiData[t.period_id] = DB.kgiData[t.period_id] || {};
+    DB.kgiData[t.period_id][t.term] = {
+      kgi: num(t.kgi), gross: num(t.gross),
+      kgiLocked: !!t.kgi_confirmed, grossLocked: !!t.gross_confirmed,
+      _sheetsIssued: !!t.sheets_issued, _evalStarted: !!t.eval_started,
+    };
+  });
+  const cur = T.periods.find(p => p.is_current) || T.periods.slice().sort((a, b) => (parseInt(String(b.id).slice(1)) || 0) - (parseInt(String(a.id).slice(1)) || 0))[0];
+  DB.currentPeriod = cur ? cur.id : (DB.periods[0]?.id || '');
+  let curQ = 'Q1';
+  if (cur) {
+    const qs = termMap[cur.id] || {};
+    const active = ['Q1', 'Q2', 'Q3', 'Q4'].find(q => qs[q]?.status === 'active');
+    if (active) curQ = active;
+    else { const conf = ['Q1', 'Q2', 'Q3', 'Q4'].filter(q => qs[q]?.status === 'confirmed'); if (conf.length) curQ = conf[conf.length - 1]; }
+  }
+  DB.currentQ = curQ;
+
+  // ---- 評価シート ----
+  DB.sheets = {};
+  const sheetById = {};
+  T.sheets.forEach(sh => {
+    DB.sheets[sh.emp_code] = DB.sheets[sh.emp_code] || {};
+    DB.sheets[sh.emp_code][sh.period_id] = DB.sheets[sh.emp_code][sh.period_id] || {};
+    const o = {
+      status: sh.status, compWeight: sh.comp_weight, kpiWeight: sh.kpi_weight,
+      locked: !!sh.locked, compItems: [], kpiItems: [], _sheetId: sh.id,
+    };
+    DB.sheets[sh.emp_code][sh.period_id][sh.q] = o;
+    sheetById[sh.id] = o;
+  });
+  T.compItems.slice().sort((a, b) => a.sort_no - b.sort_no).forEach(it => {
+    const sh = sheetById[it.sheet_id]; if (!sh) return;
+    sh.compItems.push({
+      id: it.comp_id, name: it.name, desc: it.descr || '', goal: it.goal || '',
+      weight: num(it.weight), selfScore: it.self_score, ev1Score: it.ev1_score, finalScore: it.final_score,
+      selfComment: it.self_comment || '', finalComment: it.final_comment || '', locked: !!it.locked, _id: it.id,
+    });
+  });
+  T.kpiItems.slice().sort((a, b) => a.sort_no - b.sort_no).forEach(it => {
+    const sh = sheetById[it.sheet_id]; if (!sh) return;
+    sh.kpiItems.push({
+      name: it.name, goal: it.goal || '', weight: num(it.weight),
+      selfRate: it.self_rate, ev1Score: it.ev1_score, finalScore: it.final_score, locked: !!it.locked, _id: it.id,
+    });
+  });
+
+  // ---- ブライトline ----
+  DB.brightLineData = {};
+  const blCell = (pid, q) => {
+    DB.brightLineData[pid] = DB.brightLineData[pid] || {};
+    if (!DB.brightLineData[pid][q]) DB.brightLineData[pid][q] = { ev1: {}, ev2: {}, confirmed: {}, adminConfirmed: false, _ev1Approved: {} };
+    return DB.brightLineData[pid][q];
+  };
+  T.periods.forEach(p => ['Q1', 'Q2', 'Q3', 'Q4'].forEach(q => blCell(p.id, q)));
+  T.blInputs.forEach(r => {
+    const c = blCell(r.period_id, r.q);
+    (c.ev1[r.evaluator_code] = c.ev1[r.evaluator_code] || {})[r.member_code] = r.rank;
+  });
+  T.blConfirmed.forEach(r => { blCell(r.period_id, r.q).confirmed[r.member_code] = r.rank; });
+  T.blStatus.forEach(r => { blCell(r.period_id, r.q).adminConfirmed = !!r.admin_confirmed; });
+  T.blApprovals.forEach(r => { blCell(r.period_id, r.q)._ev1Approved[r.evaluator_code] = true; });
+
+  // ---- インセンティブ ----
+  DB.incentiveHistory = {}; DB.incentiveAdjust = {}; DB.incentiveAdminConfirmed = {};
+  T.periods.forEach(p => {
+    DB.incentiveHistory[p.id] = {}; DB.incentiveAdjust[p.id] = {}; DB.incentiveAdminConfirmed[p.id] = {};
+    ['Q1', 'Q2', 'Q3', 'Q4'].forEach(q => {
+      DB.incentiveHistory[p.id][q] = { pool: 0, confirmed: false, payStatus: 'future', total: 0, dist: {}, brightMap: {} };
+      DB.incentiveAdjust[p.id][q] = {}; DB.incentiveAdminConfirmed[p.id][q] = false;
+    });
+  });
+  T.incentives.forEach(r => {
+    const h = (DB.incentiveHistory[r.period_id] = DB.incentiveHistory[r.period_id] || {});
+    h[r.q] = Object.assign(h[r.q] || { dist: {}, brightMap: {} }, {
+      pool: num(r.pool), confirmed: !!r.confirmed, payStatus: r.pay_status, total: num(r.total),
+      dist: (h[r.q] && h[r.q].dist) || {}, brightMap: (h[r.q] && h[r.q].brightMap) || {},
+    });
+    DB.incentiveAdminConfirmed[r.period_id] = DB.incentiveAdminConfirmed[r.period_id] || {};
+    DB.incentiveAdminConfirmed[r.period_id][r.q] = !!r.confirmed;
+  });
+  T.incentiveDetails.forEach(r => {
+    const h = DB.incentiveHistory[r.period_id]?.[r.q]; if (!h) return;
+    h.dist[r.member_code] = num(r.amount);
+    if (r.bright) h.brightMap[r.member_code] = r.bright;
+    DB.incentiveAdjust[r.period_id] = DB.incentiveAdjust[r.period_id] || {};
+    DB.incentiveAdjust[r.period_id][r.q] = DB.incentiveAdjust[r.period_id][r.q] || {};
+    DB.incentiveAdjust[r.period_id][r.q][r.member_code] = num(r.adjust);
+  });
+  // BL確定済みなのにインセン明細が未確定の場合は、確定BLをbrightMapへ補完（表示用）
+  Object.keys(DB.brightLineData).forEach(pid => {
+    Object.keys(DB.brightLineData[pid]).forEach(q => {
+      const bl = DB.brightLineData[pid][q];
+      const h = DB.incentiveHistory[pid]?.[q];
+      if (bl.adminConfirmed && h && !Object.keys(h.brightMap).length) h.brightMap = { ...bl.confirmed };
+    });
+  });
+
+  // ---- 賞与 ----
+  DB.bonusHistory = {}; DB.bonusAdjust = {};
+  T.periods.forEach(p => {
+    DB.bonusHistory[p.id] = {}; DB.bonusAdjust[p.id] = {};
+    ['H1', 'H2'].forEach(h => {
+      DB.bonusHistory[p.id][h] = { kgiRate: null, zone: null, confirmed: false, payDate: '', baseAmts: {}, upPool: 0, upDist: {}, upBright: {}, naikanAmts: {} };
+      DB.bonusAdjust[p.id][h] = { baseAdj: {}, naikanAdj: {} };
+    });
+  });
+  T.bonuses.forEach(r => {
+    DB.bonusHistory[r.period_id] = DB.bonusHistory[r.period_id] || {};
+    const prev = DB.bonusHistory[r.period_id][r.half] || { baseAmts: {}, upDist: {}, upBright: {}, naikanAmts: {} };
+    DB.bonusHistory[r.period_id][r.half] = Object.assign(prev, {
+      kgiRate: r.kgi_rate === null ? null : num(r.kgi_rate), zone: r.zone,
+      confirmed: !!r.confirmed, payDate: r.pay_date || '', upPool: num(r.up_pool),
+    });
+  });
+  T.bonusDetails.forEach(r => {
+    const h = DB.bonusHistory[r.period_id]?.[r.half]; if (!h) return;
+    const emp = _EMP.byId[r.emp_id]; if (!emp) return;
+    DB.bonusAdjust[r.period_id] = DB.bonusAdjust[r.period_id] || {};
+    DB.bonusAdjust[r.period_id][r.half] = DB.bonusAdjust[r.period_id][r.half] || { baseAdj: {}, naikanAdj: {} };
+    if (emp.isNaikan) {
+      h.naikanAmts[emp.name] = num(r.base_amt);
+      DB.bonusAdjust[r.period_id][r.half].naikanAdj[emp.name] = num(r.base_adj);
+    } else {
+      h.baseAmts[emp.code] = num(r.base_amt);
+      h.upDist[emp.code] = num(r.up_amt);
+      if (r.up_bright) h.upBright[emp.code] = r.up_bright;
+      DB.bonusAdjust[r.period_id][r.half].baseAdj[emp.code] = num(r.base_adj);
+    }
+  });
+
+  // ---- 給与改定 ----
+  DB.salaryHistory = {};
+  T.salaryRevs.forEach(r => {
+    DB.salaryHistory[r.period_id] = {
+      confirmed: !!r.confirmed, adjApproved: !!r.adj_approved, finalApproved: !!r.final_approved,
+      items: {}, naikanItems: {},
+    };
+  });
+  T.salaryRevItems.forEach(r => {
+    const sal = DB.salaryHistory[r.period_id]; if (!sal) return;
+    const emp = _EMP.byId[r.emp_id]; if (!emp) return;
+    const pitchUnit = (emp.pos === 'リーダー') ? (DB.params.pitchLeader || 1500) : (DB.params.pitchGeneral || 1000);
+    const it = {
+      annualAvg: r.annual_avg === null ? null : num(r.annual_avg), rank: r.rank,
+      pitch: num(r.pitch), pitchAmt: num(r.pitch) * pitchUnit,
+      adjPitch: num(r.adj_pitch), adjAmt: num(r.adj_pitch) * pitchUnit,
+      baseBefore: num(r.base_before), baseAfter: num(r.base_after),
+      fixedOTBefore: num(r.fixed_ot_before), jobAllowBefore: num(r.job_allow_before),
+      posAllow: num(r.pos_allow), commute: num(r.commute),
+    };
+    if (emp.isNaikan) sal.naikanItems[emp.name] = it; else sal.items[emp.code] = it;
+  });
+}
+
+// ============================================================
+// ログイン・ログアウト・セッション復元・パスワード変更
+// ============================================================
+function showLoginErr(msg) {
+  const e = document.getElementById('login-err');
+  if (e) { e.textContent = msg; e.style.display = msg ? 'block' : 'none'; }
+}
+function enterApp(m) {
+  CU = m; evalMember = null;
+  selPid = DB.currentPeriod || selPid; selQ = DB.currentQ || selQ; selHalf = 'H1';
+  evalPid = selPid; evalQ = selQ;
+  document.getElementById('login-page').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('sb-avatar').textContent = m.name[0];
+  document.getElementById('sb-name').textContent = m.name;
+  document.getElementById('sb-role').textContent = ROLE_LABELS[m.role] || m.role;
+  const p = DB.periods.find(x => x.id === selPid);
+  const tp = document.getElementById('tb-period'); if (tp) tp.textContent = p ? p.label : '';
+  const tq = document.getElementById('tb-q');
+  if (tq) tq.textContent = selQ + (p?.qs?.[selQ]?.status === 'active' ? ' 評価期間中' : '');
+  buildSidebar();
+  goto(m.role === 'keiri' ? 'incentive' : (m.role === 'naikan' ? 'bonus' : 'dashboard'));
+}
+async function login() {
+  const email = (document.getElementById('login-email')?.value || '').trim();
+  const pass = document.getElementById('login-pass')?.value || '';
+  const btn = document.getElementById('login-btn');
+  showLoginErr('');
+  if (!email || !pass) { showLoginErr('メールアドレスとパスワードを入力してください。'); return; }
+  if (btn) { btn.disabled = true; btn.textContent = 'ログイン中…'; }
+  try {
+    const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
+    if (error) { showLoginErr('ログインできませんでした。メールアドレスまたはパスワードをご確認ください。'); return; }
+    await loadAllFromSupabase();
+    const me = DB.members.find(m => m._authId === data.user.id);
+    if (!me) { showLoginErr('社員マスタとの紐付けが見つかりません。管理者へご連絡ください。'); await sb.auth.signOut(); return; }
+    enterApp(me);
+  } catch (e) {
+    console.error(e);
+    showLoginErr('通信エラーが発生しました。インターネット接続をご確認のうえ、もう一度お試しください。');
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'ログイン'; }
+  }
+}
+async function logout() {
+  try { await sb.auth.signOut(); } catch (e) { console.error(e); }
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-page').style.display = 'flex';
+  CU = null;
+  const pi = document.getElementById('login-pass'); if (pi) pi.value = '';
+  showLoginErr('');
+}
+// ページを開いたとき、ログイン済みなら自動で復元
+window.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const { data } = await sb.auth.getSession();
+    if (data?.session) {
+      showLoginErr('前回のログインを復元しています…');
+      await loadAllFromSupabase();
+      const me = DB.members.find(m => m._authId === data.session.user.id);
+      if (me) { enterApp(me); showLoginErr(''); return; }
+      await sb.auth.signOut();
+    }
+    showLoginErr('');
+  } catch (e) { console.error(e); showLoginErr(''); }
+});
+
+// パスワード変更
+function openPassChange() {
+  const old = document.getElementById('pass-modal'); if (old) old.remove();
+  const div = document.createElement('div');
+  div.id = 'pass-modal';
+  div.innerHTML = `
+  <div style="position:fixed;inset:0;background:rgba(27,42,74,.45);z-index:300;display:flex;align-items:center;justify-content:center" onclick="if(event.target===this)document.getElementById('pass-modal').remove()">
+    <div style="background:#fff;border-radius:14px;padding:26px 28px;width:340px;box-shadow:var(--sh2)">
+      <div style="font-size:15px;font-weight:700;color:var(--navy);margin-bottom:14px">🔑 パスワード変更</div>
+      <div class="fg"><label class="fl">新しいパスワード（8文字以上）</label><input class="fi" type="password" id="pw-new1" autocomplete="new-password"></div>
+      <div class="fg"><label class="fl">新しいパスワード（確認）</label><input class="fi" type="password" id="pw-new2" autocomplete="new-password"></div>
+      <div id="pw-err" style="display:none;color:var(--danger);font-size:12px;margin-bottom:8px"></div>
+      <div class="inline" style="justify-content:flex-end;margin-top:10px">
+        <button class="btn btn-out btn-sm" onclick="document.getElementById('pass-modal').remove()">キャンセル</button>
+        <button class="btn btn-navy btn-sm" id="pw-btn" onclick="submitPassChange()">変更する</button>
+      </div>
+    </div>
+  </div>`;
+  document.body.appendChild(div);
+}
+async function submitPassChange() {
+  const p1 = document.getElementById('pw-new1').value;
+  const p2 = document.getElementById('pw-new2').value;
+  const err = document.getElementById('pw-err');
+  const show = (m) => { err.textContent = m; err.style.display = 'block'; };
+  if (p1.length < 8) { show('パスワードは8文字以上にしてください。'); return; }
+  if (p1 !== p2) { show('確認用パスワードが一致しません。'); return; }
+  const btn = document.getElementById('pw-btn'); btn.disabled = true; btn.textContent = '変更中…';
+  try {
+    const { error } = await sb.auth.updateUser({ password: p1 });
+    if (error) { show('変更に失敗しました：' + (error.message || '通信エラー')); btn.disabled = false; btn.textContent = '変更する'; return; }
+    document.getElementById('pass-modal').remove();
+    alert('パスワードを変更しました。次回から新しいパスワードでログインしてください。');
+  } catch (e) { show('通信エラーが発生しました。'); btn.disabled = false; btn.textContent = '変更する'; }
+}
+
+// ============================================================
+// 内勤ユーザー向け画面（自分の賞与・給与改定のみ）
+// ============================================================
+const _origBuildSidebar = buildSidebar;
+buildSidebar = function () {
+  if (CU && CU.role === 'naikan') {
+    let html = `<div class="sb-sec">報酬（自分の確定分）</div><div class="sb-nav">`;
+    html += nb('nav-bo', '🎁', '賞与', 'bonus');
+    html += nb('nav-sa', '💴', '給与改定', 'salary');
+    html += `</div>`;
+    document.getElementById('sb-content').innerHTML = html;
+    return;
+  }
+  return _origBuildSidebar();
+};
+function renderNaikanBonus() {
+  let html = `<div class="pg-hd"><div class="pg-title">賞与</div><div class="pg-sub">自分の支給履歴（確定分のみ表示）</div></div>`;
+  let any = false;
+  DB.periods.forEach(p => {
+    ['H2', 'H1'].forEach(h => {
+      const b = DB.bonusHistory[p.id]?.[h]; if (!b || !b.confirmed) return;
+      const amt = b.naikanAmts?.[CU.name]; if (amt === undefined) return;
+      const adj = DB.bonusAdjust[p.id]?.[h]?.naikanAdj?.[CU.name] || 0;
+      any = true;
+      html += `<div class="card"><div class="card-hd"><span class="card-title">${p.label} ${h === 'H1' ? '上期' : '下期'}（支給日：${b.payDate || '—'}）</span><span class="badge b-ok">確定</span></div>
+      <div class="card-body"><div class="grid3">
+        <div class="stat at-navy"><div class="stat-lbl">賞与支給額</div><div class="stat-val">${fmt(amt)}<span class="stat-unit">円</span></div></div>
+        <div class="stat at-gold"><div class="stat-lbl">調整額</div><div class="stat-val">${adj > 0 ? '+' : ''}${fmt(adj)}<span class="stat-unit">円</span></div></div>
+        <div class="stat at-ok"><div class="stat-lbl">支給合計</div><div class="stat-val">${fmt(amt + adj)}<span class="stat-unit">円</span></div></div>
+      </div></div></div>`;
+    });
+  });
+  if (!any) html += `<div class="notice n-info"><span>ℹ️</span><span>確定済みの賞与はまだありません。確定後にこの画面へ自動表示されます。</span></div>`;
+  return html;
+}
+function renderNaikanSalary() {
+  let html = `<div class="pg-hd"><div class="pg-title">給与改定</div><div class="pg-sub">自分の改定履歴（確定分のみ表示）</div></div>`;
+  let any = false;
+  DB.periods.forEach(p => {
+    const sal = DB.salaryHistory[p.id]; if (!sal || !sal.finalApproved) return;
+    const s = sal.naikanItems?.[CU.name]; if (!s) return;
+    const r = calcSalaryFull(s, CU);
+    any = true;
+    html += `<div class="card"><div class="card-hd"><span class="card-title">${p.label} 給与改定</span><span class="badge b-ok">確定</span></div>
+    <div class="card-body"><div class="tbl-wrap"><table>
+      <thead><tr><th style="text-align:right">前基本給</th><th style="text-align:right">改定基本給</th><th style="text-align:right">固定残業手当</th><th style="text-align:right">職務手当</th><th style="text-align:right">役職手当</th><th style="text-align:right">通勤手当</th><th style="text-align:right">総支給額</th></tr></thead>
+      <tbody><tr>
+        <td class="num">${fmt(s.baseBefore)}円</td>
+        <td class="num" style="font-weight:700">${fmt(r.baseAfter)}円</td>
+        <td class="num">${fmt(r.fixedOTAfter)}円</td>
+        <td class="num">${fmt(r.jobAllowAfter)}円</td>
+        <td class="num">${fmt(s.posAllow)}円</td>
+        <td class="num">${fmt(s.commute)}円</td>
+        <td class="num" style="font-weight:700;color:var(--navy)">${fmt(r.total + s.commute)}円</td>
+      </tr></tbody>
+    </table></div></div></div>`;
+  });
+  if (!any) html += `<div class="notice n-info"><span>ℹ️</span><span>確定済みの給与改定はまだありません。確定後にこの画面へ自動表示されます。</span></div>`;
+  return html;
+}
+const _origRenderPage = renderPage;
+renderPage = function (page) {
+  if (CU && CU.role === 'naikan') {
+    const el = document.getElementById('content');
+    if (page === 'bonus') { el.innerHTML = renderNaikanBonus(); return; }
+    if (page === 'salary') { el.innerHTML = renderNaikanSalary(); return; }
+    el.innerHTML = '<div class="notice n-info"><span>ℹ️</span><span>この画面は閲覧できません。</span></div>';
+    return;
+  }
+  return _origRenderPage(page);
+};
+
+// ============================================================
+// 書き込み：既存の操作関数に「Supabaseへの保存」を追加
+// （見た目・計算はそのまま。操作後に該当データを保存する）
+// ============================================================
+
+// ---- 評価シート：親＋明細をまるごと保存 ----
+async function syncSheet(code, q) {
+  const sheet = DB.sheets[code]?.[evalPid]?.[q]; if (!sheet) return;
+  const up = await sb.from('evaluation_sheets')
+    .update({ status: sheet.status, comp_weight: sheet.compWeight, kpi_weight: sheet.kpiWeight, locked: !!sheet.locked })
+    .eq('emp_code', code).eq('period_id', evalPid).eq('q', q).select('id');
+  if (up.error) { sbFail('評価シート', up.error); return; }
+  let sid = up.data?.[0]?.id;
+  if (!sid) {
+    // シート未登録（管理者操作時のみ発生しうる）→新規作成
+    const ins = await sb.from('evaluation_sheets')
+      .insert({ emp_code: code, period_id: evalPid, q, status: sheet.status, comp_weight: sheet.compWeight, kpi_weight: sheet.kpiWeight, locked: !!sheet.locked })
+      .select('id');
+    if (ins.error) { sbFail('評価シート作成', ins.error); return; }
+    sid = ins.data?.[0]?.id;
+  }
+  if (!sid) return;
+  sheet._sheetId = sid;
+  const d1 = await sb.from('sheet_comp_items').delete().eq('sheet_id', sid);
+  if (d1.error) { sbFail('評価シート明細', d1.error); return; }
+  if (sheet.compItems.length) {
+    const i1 = await sb.from('sheet_comp_items').insert(sheet.compItems.map((it, i) => ({
+      sheet_id: sid, sort_no: i, comp_id: it.id || null, name: it.name || '', descr: it.desc || null,
+      goal: it.goal || null, weight: it.weight || 0,
+      self_score: it.selfScore ?? null, ev1_score: it.ev1Score ?? null, final_score: it.finalScore ?? null,
+      self_comment: it.selfComment || '', final_comment: it.finalComment || '', locked: !!it.locked,
+    })));
+    if (i1.error) { sbFail('評価シート明細', i1.error); return; }
+  }
+  const d2 = await sb.from('sheet_kpi_items').delete().eq('sheet_id', sid);
+  if (d2.error) { sbFail('KPI明細', d2.error); return; }
+  if (sheet.kpiItems.length) {
+    const i2 = await sb.from('sheet_kpi_items').insert(sheet.kpiItems.map((it, i) => ({
+      sheet_id: sid, sort_no: i, name: it.name || '', goal: it.goal || null, weight: it.weight || 0,
+      self_rate: it.selfRate ?? null, ev1_score: it.ev1Score ?? null, final_score: it.finalScore ?? null, locked: !!it.locked,
+    })));
+    if (i2.error) { sbFail('KPI明細', i2.error); return; }
+  }
+}
+// 引数の1・2番目が (code, q) の関数
+['submitGoal', 'returnGoal', 'lockGoals', 'adminUnlockGoals', 'submitSelfEval', 'submitEv1',
+ 'returnToSelf', 'submitFinal', 'returnToEv1', 'adminFinalConfirm', 'adminReturnToFinal',
+ 'unlockSheet', 'confirmAddComp', 'confirmAddKpi', 'removeCompItem', 'removeKpiItem'].forEach(name => {
+  const orig = window[name]; if (typeof orig !== 'function') return;
+  window[name] = function (...a) { const r = orig.apply(this, a); syncSheet(a[0], a[1]); return r; };
+});
+// 引数が (type, code, q, ...) の関数
+['setItemScore', 'setItemGoal', 'saveItemEdit', 'unlockItem'].forEach(name => {
+  const orig = window[name]; if (typeof orig !== 'function') return;
+  window[name] = function (...a) { const r = orig.apply(this, a); syncSheet(a[1], a[2]); return r; };
+});
+
+// ---- ブライトline ----
+async function syncBLInputs(pid, q, evCode) {
+  const map = DB.brightLineData[pid]?.[q]?.ev1?.[evCode] || {};
+  const del = await sb.from('brightline_inputs').delete().eq('period_id', pid).eq('q', q).eq('evaluator_code', evCode);
+  if (del.error) { sbFail('ブライトline入力', del.error); return; }
+  const rows = Object.entries(map).filter(([, v]) => v).map(([member, rank]) => ({ period_id: pid, q, evaluator_code: evCode, member_code: member, rank }));
+  if (rows.length) {
+    const ins = await sb.from('brightline_inputs').insert(rows);
+    if (ins.error) sbFail('ブライトline入力', ins.error);
+  }
+}
+{
+  const o = window.setBLRank;
+  window.setBLRank = function (pid, q, evCode, memberCode, val) { const r = o(pid, q, evCode, memberCode, val); syncBLInputs(pid, q, evCode); return r; };
+}
+{
+  const o = window.resetBL;
+  window.resetBL = function (pid, q, evCode) {
+    const r = o(pid, q, evCode);
+    syncBLInputs(pid, q, evCode);
+    sbRun('ブライトline承認取消', sb.from('brightline_approvals').delete().eq('period_id', pid).eq('q', q).eq('evaluator_code', evCode));
+    return r;
+  };
+}
+{
+  const o = window.approveBL;
+  window.approveBL = function (pid, q, evCode) {
+    const r = o(pid, q, evCode);
+    if (DB.brightLineData[pid]?.[q]?._ev1Approved?.[evCode]) {
+      sbRun('ブライトline承認', sb.from('brightline_approvals').upsert({ period_id: pid, q, evaluator_code: evCode }, { onConflict: 'period_id,q,evaluator_code' }));
+    }
+    return r;
+  };
+}
+{
+  const o = window.setConfirmedBL;
+  window.setConfirmedBL = function (pid, q, memberCode, val) {
+    const r = o(pid, q, memberCode, val);
+    if (val) sbRun('確定ブライトline', sb.from('brightline_confirmed').upsert({ period_id: pid, q, member_code: memberCode, rank: val }, { onConflict: 'period_id,q,member_code' }));
+    else sbRun('確定ブライトline', sb.from('brightline_confirmed').delete().eq('period_id', pid).eq('q', q).eq('member_code', memberCode));
+    return r;
+  };
+}
+{
+  const o = window.adminConfirmBL;
+  window.adminConfirmBL = function (pid, q) {
+    const r = o(pid, q);
+    const bl = DB.brightLineData[pid]?.[q];
+    if (bl?.adminConfirmed) {
+      sbRun('ブライトline確定', sb.from('brightline_status').upsert({ period_id: pid, q, admin_confirmed: true }, { onConflict: 'period_id,q' }));
+      const rows = Object.entries(bl.confirmed || {}).filter(([, v]) => v).map(([member, rank]) => ({ period_id: pid, q, member_code: member, rank }));
+      if (rows.length) sbRun('確定ブライトline', sb.from('brightline_confirmed').upsert(rows, { onConflict: 'period_id,q,member_code' }));
+    }
+    return r;
+  };
+}
+
+// ---- インセンティブ ----
+{
+  const o = window.setIncAdj;
+  window.setIncAdj = function (pid, q, code, val) {
+    const r = o(pid, q, code, val);
+    sbRun('インセンティブ調整額', sb.from('incentive_details').upsert({ period_id: pid, q, member_code: code, adjust: val || 0 }, { onConflict: 'period_id,q,member_code' }));
+    return r;
+  };
+}
+{
+  const o = window.incAdminFinal;
+  window.incAdminFinal = function (...a) {
+    const r = o.apply(this, a);
+    const pid = DB.currentPeriod, q = DB.currentQ;
+    const h = DB.incentiveHistory[pid]?.[q];
+    if (h && h.confirmed) {
+      (async () => {
+        const ok = await sbRun('インセンティブ確定', sb.from('incentives').upsert({ period_id: pid, q, pool: h.pool, confirmed: true, pay_status: h.payStatus, total: h.total }, { onConflict: 'period_id,q' }));
+        if (!ok) return;
+        const rows = Object.keys(h.dist).map(code => ({
+          period_id: pid, q, member_code: code,
+          amount: h.dist[code] || 0, bright: h.brightMap[code] || null,
+          adjust: DB.incentiveAdjust[pid]?.[q]?.[code] || 0,
+        }));
+        if (rows.length) await sbRun('インセンティブ明細', sb.from('incentive_details').upsert(rows, { onConflict: 'period_id,q,member_code' }));
+      })();
+    }
+    return r;
+  };
+}
+
+// ---- 賞与 ----
+function bonusEmpId(key, isNaikanName) {
+  return isNaikanName ? _EMP.idByName[key] : _EMP.idByCode[key];
+}
+{
+  const o = window.setBonusAdj;
+  window.setBonusAdj = function (pid, half, type, key, val) {
+    const r = o(pid, half, type, key, val);
+    const empId = bonusEmpId(key, type !== 'base');
+    if (empId) sbRun('賞与調整額', sb.from('bonus_details').upsert({ period_id: pid, half, emp_id: empId, base_adj: val || 0 }, { onConflict: 'period_id,half,emp_id' }));
+    return r;
+  };
+}
+{
+  const o = window.setNaikanBonus;
+  window.setNaikanBonus = function (pid, half, name, val) {
+    const r = o(pid, half, name, val);
+    const empId = _EMP.idByName[name];
+    if (empId) sbRun('内勤賞与', sb.from('bonus_details').upsert({ period_id: pid, half, emp_id: empId, base_amt: val || 0 }, { onConflict: 'period_id,half,emp_id' }));
+    return r;
+  };
+}
+{
+  const o = window.setBonusBL;
+  window.setBonusBL = function (pid, half, code, val) {
+    const r = o(pid, half, code, val);
+    const empId = _EMP.idByCode[code];
+    if (empId) sbRun('賞与BL', sb.from('bonus_details').upsert({ period_id: pid, half, emp_id: empId, up_bright: val || null }, { onConflict: 'period_id,half,emp_id' }));
+    return r;
+  };
+}
+{
+  const o = window.bonusAdminFinal;
+  window.bonusAdminFinal = function (pid, half) {
+    const r = o(pid, half);
+    const h = DB.bonusHistory[pid]?.[half];
+    if (h && h.confirmed) {
+      (async () => {
+        const ok = await sbRun('賞与確定', sb.from('bonuses').upsert({ period_id: pid, half, kgi_rate: h.kgiRate, zone: h.zone, confirmed: true, pay_date: h.payDate || null, up_pool: h.upPool || 0 }, { onConflict: 'period_id,half' }));
+        if (!ok) return;
+        const rows = [];
+        DB.members.filter(m => !m.isNaikan && m.eval !== '除外').forEach(m => {
+          const empId = _EMP.idByCode[m.code]; if (!empId) return;
+          rows.push({
+            period_id: pid, half, emp_id: empId,
+            base_amt: h.baseAmts[m.code] || 0,
+            base_adj: DB.bonusAdjust[pid]?.[half]?.baseAdj?.[m.code] || 0,
+            up_amt: h.upDist[m.code] || 0, up_adj: 0, up_bright: h.upBright[m.code] || null,
+          });
+        });
+        Object.keys(h.naikanAmts || {}).forEach(name => {
+          const empId = _EMP.idByName[name]; if (!empId) return;
+          rows.push({
+            period_id: pid, half, emp_id: empId,
+            base_amt: h.naikanAmts[name] || 0,
+            base_adj: DB.bonusAdjust[pid]?.[half]?.naikanAdj?.[name] || 0,
+          });
+        });
+        if (rows.length) await sbRun('賞与明細', sb.from('bonus_details').upsert(rows, { onConflict: 'period_id,half,emp_id' }));
+      })();
+    }
+    return r;
+  };
+}
+
+// ---- 給与改定 ----
+function salaryEmpIdByCode(code) {
+  if (_EMP.idByCode[code]) return _EMP.idByCode[code];
+  const m = DB.members.find(x => x.code === code);
+  return m ? _EMP.idByName[m.name] : null;
+}
+{
+  const o = window.updateSalaryPitch;
+  window.updateSalaryPitch = function (code, val) {
+    const r = o(code, val);
+    const empId = salaryEmpIdByCode(code);
+    if (empId) sbRun('給与改定ピッチ', sb.from('salary_revision_items').upsert({ period_id: selPid, emp_id: empId, adj_pitch: val || 0 }, { onConflict: 'period_id,emp_id' }));
+    return r;
+  };
+}
+{
+  const o = window.salaryAdminFinal;
+  window.salaryAdminFinal = function (pid) {
+    const r = o(pid);
+    const sal = DB.salaryHistory[pid];
+    if (sal && sal.finalApproved) {
+      (async () => {
+        const ok = await sbRun('給与改定確定', sb.from('salary_revisions').upsert({ period_id: pid, confirmed: true, adj_approved: true, final_approved: true }, { onConflict: 'period_id' }));
+        if (!ok) return;
+        const rows = [];
+        const fullRow = (s, m) => {
+          const r = calcSalaryFull(s, m);
+          return {
+            annual_avg: s.annualAvg ?? null, rank: s.rank ?? null,
+            pitch: s.pitch || 0, adj_pitch: s.adjPitch || 0,
+            base_before: s.baseBefore || 0, base_after: r.baseAfter || 0,
+            fixed_ot_before: r.fixedOTBefore || 0,
+            job_allow_before: s.jobAllowBefore || 0,
+            pos_allow: s.posAllow || 0, commute: s.commute || 0,
+          };
+        };
+        Object.entries(sal.items || {}).forEach(([code, s]) => {
+          const empId = _EMP.idByCode[code]; const m = _EMP.byCode[code]; if (!empId || !m) return;
+          rows.push(Object.assign({ period_id: pid, emp_id: empId }, fullRow(s, m)));
+        });
+        Object.entries(sal.naikanItems || {}).forEach(([name, s]) => {
+          const empId = _EMP.idByName[name]; const m = _EMP.byId[empId]; if (!empId || !m) return;
+          rows.push(Object.assign({ period_id: pid, emp_id: empId }, fullRow(s, m)));
+        });
+        if (rows.length) await sbRun('給与改定明細', sb.from('salary_revision_items').upsert(rows, { onConflict: 'period_id,emp_id' }));
+      })();
+    }
+    return r;
+  };
+}
+
+// ---- KGI・期・シート発行・評価開始 ----
+async function syncTerm(pid, term) {
+  const d = DB.kgiData[pid]?.[term]; if (!d) return;
+  await sbRun('KGI', sb.from('period_terms').update({
+    kgi: d.kgi || 0, gross: d.gross || 0,
+    kgi_confirmed: !!d.kgiLocked, gross_confirmed: !!d.grossLocked,
+  }).eq('period_id', pid).eq('term', term));
+}
+{
+  const o = window.setKgi;
+  window.setKgi = function (pid, k, field, val) { const r = o(pid, k, field, val); syncTerm(pid, k); return r; };
+}
+{
+  const o = window.toggleKgiLock;
+  window.toggleKgiLock = function (pid, k, field) { const r = o(pid, k, field); syncTerm(pid, k); return r; };
+}
+{
+  const o = window.createNewPeriod;
+  window.createNewPeriod = function () {
+    const before = new Set(DB.periods.map(p => p.id));
+    const r = o();
+    const created = DB.periods.find(p => !before.has(p.id));
+    if (created) {
+      (async () => {
+        const pid = created.id;
+        const ok = await sbRun('期の作成', sb.from('periods').insert({ id: pid, label: created.label, year_label: created.year || null, is_current: false }));
+        if (!ok) return;
+        const terms = ['Q1', 'Q2', 'Q3', 'Q4'].map(q => ({ period_id: pid, term: q, label: created.qs[q]?.label || q, pay_date: null, status: 'future', kgi: 0, gross: 0 }))
+          .concat(['H1', 'H2'].map(h => ({ period_id: pid, term: h, label: null, pay_date: null, status: 'future', kgi: 0, gross: 0 })));
+        await sbRun('期の作成', sb.from('period_terms').insert(terms));
+        await sbRun('期の作成', sb.from('brightline_status').insert(['Q1', 'Q2', 'Q3', 'Q4'].map(q => ({ period_id: pid, q, admin_confirmed: false }))));
+        await sbRun('期の作成', sb.from('incentives').insert(['Q1', 'Q2', 'Q3', 'Q4'].map(q => ({ period_id: pid, q, pool: 0, confirmed: false, pay_status: 'future', total: 0 }))));
+        await sbRun('期の作成', sb.from('bonuses').insert(['H1', 'H2'].map(h => ({ period_id: pid, half: h, confirmed: false, up_pool: 0 }))));
+        await sbRun('期の作成', sb.from('salary_revisions').insert({ period_id: pid, confirmed: false, adj_approved: false, final_approved: false }));
+      })();
+    }
+    return r;
+  };
+}
+{
+  const o = window.issueSheets;
+  window.issueSheets = function (pid, q) {
+    const r = o(pid, q);
+    const p = DB.periods.find(x => x.id === pid);
+    if (p && p.qs[q]?.status === 'goal') {
+      (async () => {
+        const rows = DB.members.filter(m => !m.isNaikan && m.eval !== '除外').map(m => {
+          const sh = DB.sheets[m.code]?.[pid]?.[q] || {};
+          return { emp_code: m.code, period_id: pid, q, status: sh.status || 'goal_setting', comp_weight: sh.compWeight || 40, kpi_weight: sh.kpiWeight || 60, locked: false };
+        });
+        if (rows.length) await sbRun('シート発行', sb.from('evaluation_sheets').upsert(rows, { onConflict: 'emp_code,period_id,q', ignoreDuplicates: true }));
+        await sbRun('シート発行', sb.from('period_terms').update({ status: 'goal', sheets_issued: true }).eq('period_id', pid).eq('term', q));
+      })();
+    }
+    return r;
+  };
+}
+{
+  const o = window.startEval;
+  window.startEval = function (pid, q) {
+    const r = o(pid, q);
+    const p = DB.periods.find(x => x.id === pid);
+    if (p && p.qs[q]?.status === 'active') {
+      (async () => {
+        await sbRun('評価開始', sb.from('period_terms').update({ status: 'active', eval_started: true }).eq('period_id', pid).eq('term', q));
+        await sbRun('評価開始', sb.from('evaluation_sheets').update({ status: 'self_eval' }).eq('period_id', pid).eq('q', q).in('status', ['goal_setting', 'goal_wait', 'goal_locked']));
+      })();
+    }
+    return r;
+  };
+}
+
+// ---- パラメータ設定 ----
+async function syncSettings() {
+  await sbRun('パラメータ設定', sb.from('app_settings').update({
+    fixed_ot: DB.fixedOTSettings, params: DB.params,
+    bright_ranks: DB.brightRanks, bright_dist: DB.brightDist,
+  }).eq('id', 1));
+}
+{
+  const o = window.updateRankCount;
+  window.updateRankCount = function () { const r = o(); syncSettings(); return r; };
+}
+
+</script>
+</body>
+</html>
