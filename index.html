@@ -114,7 +114,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
     <div class="login-logo">
       <div class="login-icon">IWO</div>
       <h1 style="font-size:20px;font-weight:700;color:var(--navy)">評価システム</h1>
-      <p style="font-size:12px;color:var(--sub);margin-top:3px">株式会社アイダブルオー v3.5（本番接続版）</p>
+      <p style="font-size:12px;color:var(--sub);margin-top:3px">株式会社アイダブルオー v3.6（本番接続版）</p>
     </div>
     <div class="fg"><label class="fl">メールアドレス</label><input class="fi" id="login-email" type="email" placeholder="taro@iwo.co.jp" autocomplete="username" onkeydown="if(event.key==='Enter')login()"></div>
     <div class="fg" style="margin-bottom:8px"><label class="fl">パスワード</label><input class="fi" id="login-pass" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')login()"></div>
@@ -125,7 +125,7 @@ tr:last-child td{border-bottom:none;}tr:hover td{background:#FAFBFD;}
 </div>
 <div id="app" style="display:none">
   <div id="sidebar">
-    <div class="sb-logo"><div class="sb-logo-mark"><div class="sb-icon">IWO</div><div><div class="sb-title">評価システム</div><div class="sb-ver">v3.5（本番接続版）</div></div></div></div>
+    <div class="sb-logo"><div class="sb-logo-mark"><div class="sb-icon">IWO</div><div><div class="sb-title">評価システム</div><div class="sb-ver">v3.6（本番接続版）</div></div></div></div>
     <div class="sb-user"><div class="sb-avatar" id="sb-avatar">和</div><div><div class="sb-uname" id="sb-name">和氣 佑輔</div><div class="sb-urole" id="sb-role">管理者</div></div></div>
     <div id="sb-content"></div>
   </div>
@@ -1263,6 +1263,8 @@ function renderEvalDetail(code,q){
     <div class="step"><div class="step-dot ${st.done?'sd-done':st.active?'sd-active':'sd-pending'}">${st.done?'✓':i+1}</div><div class="step-lbl" style="white-space:pre-line">${st.l}</div></div>`).join('');
   const canEditGoals=(isAdmin&&!confirmed)||(isSelf&&sheet.status==='goal_setting')||(isGoalApprover&&sheet.status==='goal_wait');
   const canEdit=canEditGoals;
+  // v3.6: 削除権限 — 管理者は最終確定前まで常に可 / 本人は目標設定中（ロック前）のみ可
+  const canDelete=(isAdmin&&!confirmed)||(isSelf&&sheet.status==='goal_setting');
   const compRows=sheet.compItems.map((item,i)=>{
     const itemLocked=item.locked&&!isAdmin;const itemGoalOnly=false;
     return`<tr class="${itemLocked?'locked-row':''}">
@@ -1281,8 +1283,8 @@ function renderEvalDetail(code,q){
       <td style="text-align:center">${canFinalInput?scoreSelect(item.finalScore,4,`setItemScore('comp','${code}','${q}',${i},'finalScore',this.value)`):scoreChip(item.finalScore,4)}</td>
       <td class="num">${(((item.finalScore??item.ev1Score??0)*(item.weight||0)/compWsum)*(sheet.compWeight/4)).toFixed(2)}</td>
       <td>
-        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('comp','${code}','${q}',${i})">修正</button>`:
-        !confirmed&&isSelf?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeCompItem('${code}','${q}',${i})">✕</button>`:''}
+        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('comp','${code}','${q}',${i})">修正</button>${canDelete?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeCompItem('${code}','${q}',${i})">✕ 削除</button>`:''}`:
+        !confirmed&&isSelf&&sheet.status==='goal_setting'?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeCompItem('${code}','${q}',${i})">✕ 削除</button>`:''}
         ${isAdmin&&itemLocked?`<button class="btn btn-warn btn-sm" onclick="unlockItem('comp','${code}','${q}',${i})">🔓解除</button>`:''}
       </td>
     </tr>`;
@@ -1303,8 +1305,8 @@ function renderEvalDetail(code,q){
       <td style="text-align:center">${canFinalInput?scoreSelect(item.finalScore,6,`setItemScore('kpi','${code}','${q}',${i},'finalScore',this.value)`):scoreChip(item.finalScore,6)}</td>
       <td class="num">${(((item.finalScore??item.ev1Score??0)*(item.weight||0)/kpiWsum)*(sheet.kpiWeight/6)).toFixed(2)}</td>
       <td>
-        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('kpi','${code}','${q}',${i})">修正</button>`
-        :!confirmed&&isSelf?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKpiItem('${code}','${q}',${i})">✕</button>`:''}
+        ${itemLocked?`<span class="lock-badge">🔒 ロック</span>`:canEdit?`<button class="btn btn-out btn-sm" onclick="openItemEdit('kpi','${code}','${q}',${i})">修正</button>${canDelete?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKpiItem('${code}','${q}',${i})">✕ 削除</button>`:''}`
+        :!confirmed&&isSelf&&sheet.status==='goal_setting'?`<button class="btn btn-ghost btn-sm" style="color:var(--danger)" onclick="removeKpiItem('${code}','${q}',${i})">✕ 削除</button>`:''}
         ${isAdmin&&itemLocked?`<button class="btn btn-warn btn-sm" onclick="unlockItem('kpi','${code}','${q}',${i})">🔓解除</button>`:''}
       </td>
     </tr>`;
@@ -1341,7 +1343,7 @@ function renderEvalDetail(code,q){
       <button class="btn btn-navy btn-sm" onclick="adminFinalConfirm('${code}','${q}')">🔒 最終確定</button>
       <button class="btn btn-out btn-sm" style="color:var(--danger)" onclick="adminReturnToFinal('${code}','${q}')">↩ 最終評価者へ差し戻し</button>`:''}
     ${/* 管理者：目標ロック解除 */ isAdmin&&!confirmed&&(sheet.status==='goal_locked'||anyItemLocked)?`<button class="btn btn-warn btn-sm" onclick="adminUnlockGoals('${code}','${q}')">🔓 目標ロック解除（管理者のみ）</button>`:''}
-    ${CU.role==='admin'&&sheet.status==='confirmed'?`<span class="badge b-ok">✅ 確定済 — 再開するには管理者ロック解除が必要です</span>`:''}
+    ${CU.role==='admin'&&sheet.status==='confirmed'?`<span class="badge b-ok">✅ 確定済 — 確定後の修正・削除はできません</span>`:''}
   </div></div>
 
   <div style="display:flex;border-bottom:1px solid var(--border);background:#fff;border-radius:var(--r) var(--r) 0 0;overflow:hidden;border:1px solid var(--border);border-bottom:none">
@@ -1407,11 +1409,32 @@ function confirmAddComp(code,q){
   document.getElementById('add-item-area').innerHTML='';
   const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
 }
-function removeCompItem(code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;sheet.compItems.splice(i,1);const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
-function removeKpiItem(code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;sheet.kpiItems.splice(i,1);const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
-function unlockItem(type,code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;if(type==='comp')sheet.compItems[i].locked=false;else sheet.kpiItems[i].locked=false;const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
+function removeCompItem(code,q,i){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const item=sheet.compItems[i];if(!item)return;
+  if(sheet.status==='confirmed'){alert('この評価は最終確定済みのため、修正・削除はできません。');return;}
+  const isAdmin=CU.role==='admin';
+  if(!isAdmin&&(item.locked||sheet.locked)){alert('目標はロック済みのため削除できません。修正が必要な場合は管理者へ連絡してください。');return;}
+  if(!isAdmin&&!(CU.code===code&&sheet.status==='goal_setting')){alert('この項目を削除する権限がありません。');return;}
+  if(!confirm(`コンピテンシー項目「${item.name||item.id}」を削除しますか？\nこの操作は元に戻せません。`))return;
+  sheet.compItems.splice(i,1);
+  const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
+}
+function removeKpiItem(code,q,i){
+  const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  const item=sheet.kpiItems[i];if(!item)return;
+  if(sheet.status==='confirmed'){alert('この評価は最終確定済みのため、修正・削除はできません。');return;}
+  const isAdmin=CU.role==='admin';
+  if(!isAdmin&&(item.locked||sheet.locked)){alert('目標はロック済みのため削除できません。修正が必要な場合は管理者へ連絡してください。');return;}
+  if(!isAdmin&&!(CU.code===code&&sheet.status==='goal_setting')){alert('この項目を削除する権限がありません。');return;}
+  if(!confirm(`KPI項目「${item.name}」を削除しますか？\nこの操作は元に戻せません。`))return;
+  sheet.kpiItems.splice(i,1);
+  const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);
+}
+function unlockItem(type,code,q,i){const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;if(sheet.status==='confirmed'){alert('最終確定済みの評価は修正できません。');return;}if(type==='comp')sheet.compItems[i].locked=false;else sheet.kpiItems[i].locked=false;const el=document.getElementById('eval-detail');if(el)el.innerHTML=renderEvalDetail(code,q);}
 function unlockSheet(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  if(sheet.status==='confirmed'){alert('最終確定済みの評価は、いかなる場合でもロック解除・修正・削除はできません。');return;}
   if(!confirm('シートのロックを解除しますか？（管理者権限）'))return;
   sheet.locked=false;
   if(sheet.status==='confirmed')sheet.status='admin_wait';
@@ -1988,6 +2011,7 @@ function returnToEv1(code,q){
 }
 function adminFinalConfirm(code,q){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  if(!confirm('この評価を最終確定しますか？\n【重要】確定後は、管理者を含め誰も修正・削除・ロック解除ができなくなります。'))return;
   sheet.status='confirmed';sheet.locked=true;
   alert('評価を最終確定しました。');
   renderPage('eval-sheet');
@@ -2001,6 +2025,7 @@ function adminReturnToFinal(code,q){
 
 function openItemEdit(type,code,q,i){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  if(sheet.status==='confirmed'){alert('この評価は最終確定済みのため、修正・削除はできません。');return;}
   const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
   const old=document.getElementById('edit-modal');if(old)old.remove();
   const modal=document.createElement('div');
@@ -2026,6 +2051,7 @@ function openItemEdit(type,code,q,i){
 }
 function saveItemEdit(type,code,q,i){
   const sheet=DB.sheets[code]?.[evalPid]?.[q];if(!sheet)return;
+  if(sheet.status==='confirmed'){alert('この評価は最終確定済みのため、修正できません。');return;}
   const item=type==='comp'?sheet.compItems[i]:sheet.kpiItems[i];if(!item)return;
   if(type==='comp'){
     item.goal=document.getElementById('edit-goal').value;
