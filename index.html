@@ -608,10 +608,11 @@ function renderDashboard(){
 }
 function renderAdminDashboard(){
   const scores=getScores(DB.currentPeriod);const bright=getBrightRanks(DB.currentPeriod,DB.currentQ);const pool=calcPool(DB.currentPeriod,DB.currentQ);
+  const blDoneA=DB.brightLineData?.[DB.currentPeriod]?.[DB.currentQ]?.adminConfirmed||false;
   const kgiD=DB.kgiData[DB.currentPeriod]?.[DB.currentQ]||{kgi:0,gross:0};
   const evalMs=DB.members.filter(m=>!m.isNaikan&&m.eval!=='除外');
   const rows=evalMs.map(m=>{
-    const s=scores[m.code];const b=bright[m.code]||'—';const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
+    const s=scores[m.code];const b=blDoneA?(bright[m.code]||'—'):'—';const bi=DB.brightRanks.indexOf(b);const bc=bi>=0?getBrightColor(bi):{color:'var(--sub)',bg:'#F0F2F7'};
     const sheet=DB.sheets[m.code]?.[DB.currentPeriod]?.[DB.currentQ];
     return`<tr><td>${memberCell(m.code)}</td><td class="num">${s?.Q1??'—'}</td><td class="num">${s?.Q2??'—'}</td><td class="num">${s?.Q3??'—'}</td><td style="text-align:center">${s?.Q3?rankChip(s.Q3):'<span style="color:var(--warn)">評価中</span>'}</td><td style="text-align:center"><span style="padding:2px 10px;border-radius:6px;font-size:12px;font-weight:700;background:${bc.bg};color:${bc.color}">${b}</span></td><td>${statusBadge(sheet?.status||'goal_setting')}</td></tr>`;
   }).join('');
